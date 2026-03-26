@@ -146,9 +146,12 @@
             color: #1e293b;
         }
 
-        /* Список игроков */
+        /* КОМПАКТНЫЙ СПИСОК ИГРОКОВ */
         #players-list {
             margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
         .empty-state {
@@ -161,105 +164,98 @@
         .player-card {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 15px;
-            margin: 10px 0;
-            transition: all 0.3s;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            border-radius: 8px;
+            padding: 8px 12px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .player-card.dead {
             opacity: 0.5;
             background: #f1f5f9;
-            filter: grayscale(0.2);
         }
 
         .player-info {
             display: flex;
             align-items: center;
-            flex-wrap: wrap;
             gap: 10px;
-            margin-bottom: 12px;
+            flex-wrap: wrap;
         }
 
         .player-info strong {
-            font-size: 18px;
+            font-size: 14px;
+            font-weight: 600;
             color: #1e293b;
+            min-width: 70px;
         }
 
         .role-badge {
             background: #e0e7ff;
             color: #4338ca;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 16px;
+            font-size: 11px;
             font-weight: 600;
         }
 
         .status-badge {
-            background: #dcfce7;
-            color: #166534;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 12px;
             font-weight: 600;
         }
 
-        .player-card.dead .status-badge {
+        .status-badge.alive {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-badge.dead {
             background: #fee2e2;
             color: #991b1b;
         }
 
         .player-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
         }
 
         .player-actions select {
-            padding: 6px 10px;
+            padding: 4px 8px;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 11px;
+            background: white;
             cursor: pointer;
+        }
+
+        .kill-btn, .remove-btn {
+            padding: 4px 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            transition: all 0.2s;
         }
 
         .kill-btn {
             background: #ef4444;
             color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
         }
 
         .kill-btn:hover {
             background: #dc2626;
-            transform: scale(0.95);
         }
 
         .remove-btn {
             background: #94a3b8;
             color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
         }
 
         .remove-btn:hover {
@@ -383,9 +379,17 @@
                 width: 100%;
             }
             
-            .player-info {
+            .player-card {
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: stretch;
+            }
+            
+            .player-info {
+                justify-content: space-between;
+            }
+            
+            .player-actions {
+                justify-content: flex-start;
             }
         }
 
@@ -421,7 +425,7 @@
         <!-- Панель управления -->
         <div class="control-panel">
             <input type="text" id="player-name-input" placeholder="Введите имя игрока">
-            <button id="add-player-btn">➕ Добавить игрока</button>
+            <button id="add-player-btn">➕ Добавить</button>
             <button id="random-roles-btn">🎲 Случайные роли</button>
             <button id="toggle-phase-btn">🌙/☀️ Сменить фазу</button>
         </div>
@@ -451,7 +455,7 @@
     <script>
         // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
         let players = [];
-        let currentPhase = 'night'; // 'night' или 'day'
+        let currentPhase = 'night';
         let logMessages = [];
         let nightActions = {
             mafiaKill: null,
@@ -496,7 +500,6 @@
                     doctorSave: null
                 };
                 
-                // Обновляем интерфейс
                 renderPlayersList();
                 renderLog();
                 updatePhaseUI();
@@ -509,10 +512,7 @@
 
         function resetGame() {
             if (confirm('⚠️ Вы уверены? Все данные игры будут потеряны!')) {
-                // Очищаем localStorage
                 localStorage.removeItem(STORAGE_KEY);
-                
-                // Сбрасываем переменные
                 players = [];
                 currentPhase = 'night';
                 logMessages = [];
@@ -522,11 +522,9 @@
                     doctorSave: null
                 };
                 
-                // Обновляем UI
                 renderPlayersList();
                 renderLog();
                 updatePhaseUI();
-                
                 addLogMessage('🔄 Игра сброшена. Создайте новых игроков.');
                 console.log('🔄 Игра сброшена');
             }
@@ -536,7 +534,6 @@
         function addLogMessage(message) {
             const timestamp = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
             logMessages.unshift(`[${timestamp}] ${message}`);
-            // Ограничиваем лог 100 сообщениями
             if (logMessages.length > 100) logMessages.pop();
             renderLog();
             saveGameState();
@@ -562,7 +559,7 @@
             players.push({
                 id: Date.now(),
                 name: name.trim(),
-                role: 'civilian',  // Автоматически назначаем роль "Мирный"
+                role: 'civilian',
                 isAlive: true,
                 isLeft: false,
                 voteTarget: null
@@ -637,65 +634,34 @@
                 return;
             }
             
-            // Определяем количество ролей в зависимости от количества игроков
             let mafiaCount = 1;
-            let commissionerCount = 1;
-            let doctorCount = 1;
+            if (alivePlayers.length >= 7) mafiaCount = 2;
+            if (alivePlayers.length >= 10) mafiaCount = 3;
             
-            if (alivePlayers.length >= 7) {
-                mafiaCount = 2;
-            }
-            if (alivePlayers.length >= 10) {
-                mafiaCount = 3;
-            }
-            
-            // Создаём массив ролей
             let roles = [];
+            for (let i = 0; i < mafiaCount; i++) roles.push('mafia');
+            roles.push('commissioner');
+            roles.push('doctor');
             
-            // Добавляем мафию
-            for (let i = 0; i < mafiaCount; i++) {
-                roles.push('mafia');
-            }
-            
-            // Добавляем комиссара
-            for (let i = 0; i < commissionerCount; i++) {
-                roles.push('commissioner');
-            }
-            
-            // Добавляем доктора
-            for (let i = 0; i < doctorCount; i++) {
-                roles.push('doctor');
-            }
-            
-            // Остальные - мирные
             const civilianCount = alivePlayers.length - roles.length;
-            for (let i = 0; i < civilianCount; i++) {
-                roles.push('civilian');
-            }
+            for (let i = 0; i < civilianCount; i++) roles.push('civilian');
             
-            // Перемешиваем роли
+            // Перемешиваем
             for (let i = roles.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [roles[i], roles[j]] = [roles[j], roles[i]];
             }
             
-            // Назначаем роли игрокам
             alivePlayers.forEach((player, index) => {
                 player.role = roles[index];
             });
             
-            // Обновляем отображение
             renderPlayersList();
             
-            // Логируем распределение
             addLogMessage(`🎲 Случайное распределение ролей (${alivePlayers.length} игроков):`);
-            addLogMessage(`   🔪 Мафия: ${mafiaCount} чел.`);
-            addLogMessage(`   🔍 Комиссар: ${commissionerCount} чел.`);
-            addLogMessage(`   💊 Доктор: ${doctorCount} чел.`);
-            addLogMessage(`   👨🌾 Мирные: ${civilianCount} чел.`);
+            addLogMessage(`   🔪 Мафия: ${mafiaCount} | 🔍 Комиссар: 1 | 💊 Доктор: 1 | 👨🌾 Мирные: ${civilianCount}`);
             
             alert(`Роли распределены!\n\n🔪 Мафия: ${mafiaCount} чел.\n🔍 Комиссар: 1 чел.\n💊 Доктор: 1 чел.\n👨🌾 Мирные: ${civilianCount} чел.`);
-            
             saveGameState();
         }
 
@@ -725,10 +691,8 @@
         // ==================== НОЧНЫЕ ДЕЙСТВИЯ ====================
         function setMafiaKill(playerId) {
             if (currentPhase !== 'night') return;
-            
             const player = players.find(p => p.id === playerId);
             if (!player || !player.isAlive) return;
-            
             nightActions.mafiaKill = playerId;
             addLogMessage(`🔪 Мафия выбрала жертву: ${player.name}`);
             renderNightActionsUI();
@@ -737,10 +701,8 @@
 
         function setCommissionerCheck(playerId) {
             if (currentPhase !== 'night') return;
-            
             const player = players.find(p => p.id === playerId);
             if (!player || !player.isAlive) return;
-            
             nightActions.commissionerCheck = playerId;
             const role = player.role === 'mafia' ? 'МАФИЯ' : 'мирный';
             addLogMessage(`🔍 Комиссар проверил ${player.name} — это ${role}`);
@@ -750,10 +712,8 @@
 
         function setDoctorSave(playerId) {
             if (currentPhase !== 'night') return;
-            
             const player = players.find(p => p.id === playerId);
             if (!player || !player.isAlive) return;
-            
             nightActions.doctorSave = playerId;
             addLogMessage(`💊 Доктор лечит: ${player.name}`);
             renderNightActionsUI();
@@ -773,13 +733,7 @@
                 addLogMessage(`💊 Доктор спас ${killedPlayer.name} от смерти!`);
             }
             
-            // Сбрасываем ночные действия
-            nightActions = {
-                mafiaKill: null,
-                commissionerCheck: null,
-                doctorSave: null
-            };
-            
+            nightActions = { mafiaKill: null, commissionerCheck: null, doctorSave: null };
             setPhase('day');
             renderPlayersList();
             saveGameState();
@@ -787,7 +741,6 @@
 
         function renderNightActionsUI() {
             if (!nightActionsDiv) return;
-            
             const alivePlayers = players.filter(p => p.isAlive);
             
             if (alivePlayers.length === 0) {
@@ -798,34 +751,34 @@
             nightActionsDiv.innerHTML = `
                 <h3>🌙 Ночные действия</h3>
                 <div class="night-action-group">
-                    <h4>🔪 Мафия (выберите жертву)</h4>
+                    <h4>🔪 Мафия</h4>
                     <select id="mafia-kill-select">
                         <option value="">-- Выбрать --</option>
                         ${alivePlayers.map(p => `<option value="${p.id}" ${nightActions.mafiaKill === p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
                     </select>
-                    <button onclick="setMafiaKill(parseInt(document.getElementById('mafia-kill-select').value))">Подтвердить</button>
+                    <button onclick="setMafiaKill(parseInt(document.getElementById('mafia-kill-select').value))">Выбрать</button>
                 </div>
                 <div class="night-action-group">
-                    <h4>🔍 Комиссар (проверить игрока)</h4>
+                    <h4>🔍 Комиссар</h4>
                     <select id="commissioner-check-select">
                         <option value="">-- Выбрать --</option>
                         ${alivePlayers.map(p => `<option value="${p.id}" ${nightActions.commissionerCheck === p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
                     </select>
-                    <button onclick="setCommissionerCheck(parseInt(document.getElementById('commissioner-check-select').value))">Подтвердить</button>
+                    <button onclick="setCommissionerCheck(parseInt(document.getElementById('commissioner-check-select').value))">Проверить</button>
                 </div>
                 <div class="night-action-group">
-                    <h4>💊 Доктор (кого лечить)</h4>
+                    <h4>💊 Доктор</h4>
                     <select id="doctor-save-select">
                         <option value="">-- Выбрать --</option>
                         ${alivePlayers.map(p => `<option value="${p.id}" ${nightActions.doctorSave === p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
                     </select>
-                    <button onclick="setDoctorSave(parseInt(document.getElementById('doctor-save-select').value))">Подтвердить</button>
+                    <button onclick="setDoctorSave(parseInt(document.getElementById('doctor-save-select').value))">Лечить</button>
                 </div>
                 <button class="resolve-btn" onclick="resolveNight()">🌙 Завершить ночь → день</button>
             `;
         }
 
-        // ==================== ОТРИСОВКА ИГРОКОВ ====================
+        // ==================== КОМПАКТНАЯ ОТРИСОВКА ИГРОКОВ ====================
         function renderPlayersList() {
             if (!playersListEl) return;
             
@@ -839,19 +792,19 @@
                     <div class="player-info">
                         <strong>${escapeHtml(player.name)}</strong>
                         <span class="role-badge">${player.role ? getRoleName(player.role) : '⚡ Без роли'}</span>
-                        <span class="status-badge">${player.isAlive ? '❤️ Жив' : '💀 Мёртв'}</span>
+                        <span class="status-badge ${player.isAlive ? 'alive' : 'dead'}">${player.isAlive ? '❤️ Жив' : '💀 Мёртв'}</span>
                     </div>
                     <div class="player-actions">
                         <select onchange="setRole(${player.id}, this.value)" ${!player.isAlive ? 'disabled' : ''}>
-                            <option value="">Назначить роль</option>
+                            <option value="">Роль</option>
                             <option value="mafia" ${player.role === 'mafia' ? 'selected' : ''}>🔪 Мафия</option>
                             <option value="commissioner" ${player.role === 'commissioner' ? 'selected' : ''}>🔍 Комиссар</option>
                             <option value="doctor" ${player.role === 'doctor' ? 'selected' : ''}>💊 Доктор</option>
                             <option value="civilian" ${player.role === 'civilian' ? 'selected' : ''}>👨🌾 Мирный</option>
                             <option value="left" ${player.role === 'left' ? 'selected' : ''}>🚪 Отошёл</option>
                         </select>
-                        <button onclick="toggleAlive(${player.id})" class="kill-btn">${player.isAlive ? '💀 Убить' : '✨ Воскресить'}</button>
-                        <button onclick="removePlayer(${player.id})" class="remove-btn">🗑️ Удалить</button>
+                        <button onclick="toggleAlive(${player.id})" class="kill-btn">${player.isAlive ? '💀' : '✨'}</button>
+                        <button onclick="removePlayer(${player.id})" class="remove-btn">🗑️</button>
                     </div>
                 </div>
             `).join('');
@@ -866,22 +819,18 @@
 
         function addResetButton() {
             const controlPanel = document.querySelector('.control-panel');
-            if (controlPanel) {
-                // Проверяем, нет ли уже кнопки сброса
-                if (!document.getElementById('reset-game-btn')) {
-                    const resetBtn = document.createElement('button');
-                    resetBtn.id = 'reset-game-btn';
-                    resetBtn.textContent = '🔄 Сбросить всё';
-                    resetBtn.className = 'reset-btn';
-                    resetBtn.onclick = resetGame;
-                    controlPanel.appendChild(resetBtn);
-                }
+            if (controlPanel && !document.getElementById('reset-game-btn')) {
+                const resetBtn = document.createElement('button');
+                resetBtn.id = 'reset-game-btn';
+                resetBtn.textContent = '🔄 Сбросить всё';
+                resetBtn.className = 'reset-btn';
+                resetBtn.onclick = resetGame;
+                controlPanel.appendChild(resetBtn);
             }
         }
 
         // ==================== ИНИЦИАЛИЗАЦИЯ ====================
         function init() {
-            // Загружаем сохранённое состояние или создаём новое
             const loaded = loadGameState();
             
             if (!loaded) {
@@ -890,10 +839,8 @@
                 addLogMessage('📀 Загружено сохранённое состояние игры');
             }
             
-            // Добавляем кнопку сброса
             addResetButton();
             
-            // Настраиваем обработчики для добавления игроков
             const addPlayerBtn = document.getElementById('add-player-btn');
             const playerNameInput = document.getElementById('player-name-input');
             
@@ -902,7 +849,6 @@
                     addPlayer(playerNameInput.value);
                     playerNameInput.value = '';
                 };
-                
                 playerNameInput.onkeypress = (e) => {
                     if (e.key === 'Enter') {
                         addPlayer(playerNameInput.value);
@@ -911,29 +857,21 @@
                 };
             }
             
-            // Кнопка случайных ролей
             const randomRolesBtn = document.getElementById('random-roles-btn');
             if (randomRolesBtn) {
-                randomRolesBtn.onclick = () => {
-                    assignRandomRoles();
-                };
+                randomRolesBtn.onclick = () => assignRandomRoles();
             }
             
-            // Кнопка смены фазы
             const togglePhaseBtn = document.getElementById('toggle-phase-btn');
             if (togglePhaseBtn) {
-                togglePhaseBtn.onclick = () => {
-                    setPhase(currentPhase === 'night' ? 'day' : 'night');
-                };
+                togglePhaseBtn.onclick = () => setPhase(currentPhase === 'night' ? 'day' : 'night');
             }
             
-            // Рендерим UI ночных действий
             if (currentPhase === 'night') {
                 renderNightActionsUI();
             }
         }
 
-        // Делаем функции глобальными для доступа из HTML
         window.addPlayer = addPlayer;
         window.removePlayer = removePlayer;
         window.setRole = setRole;
@@ -946,7 +884,6 @@
         window.resetGame = resetGame;
         window.assignRandomRoles = assignRandomRoles;
 
-        // Запускаем при загрузке страницы
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>

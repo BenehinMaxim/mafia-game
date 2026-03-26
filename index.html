@@ -17,6 +17,7 @@
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
             padding: 12px;
+            color: #ffffff;
         }
 
         .container {
@@ -42,6 +43,12 @@
             display: inline-block;
             padding-bottom: 5px;
             font-size: 1.3rem;
+        }
+
+        .card h3 {
+            color: #ffd966;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
         }
 
         h1 {
@@ -90,6 +97,16 @@
             background: #6c5ce7;
         }
 
+        button.outline {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #ffd966;
+        }
+
+        button.outline:active {
+            background: rgba(255,255,255,0.1);
+        }
+
         button:disabled {
             opacity: 0.5;
             transform: none;
@@ -112,6 +129,7 @@
             border-radius: 14px;
             font-size: 16px;
             background: rgba(255,255,255,0.95);
+            color: #1a1a2e;
         }
 
         .control-panel input:focus {
@@ -119,8 +137,82 @@
             box-shadow: 0 0 0 2px #ffd966;
         }
 
-        .control-panel button {
-            flex: 0 0 auto;
+        .control-panel input::placeholder {
+            color: #666;
+        }
+
+        .main-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .main-buttons button {
+            flex: 1;
+        }
+
+        /* Кнопка сброса - компактная */
+        .reset-button-wrapper {
+            position: relative;
+        }
+        
+        .reset-trigger {
+            background: rgba(100, 116, 139, 0.5);
+            padding: 12px 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        
+        .reset-trigger:hover {
+            background: rgba(100, 116, 139, 0.8);
+            color: white;
+        }
+        
+        .reset-trigger:active {
+            transform: scale(0.97);
+        }
+        
+        .reset-confirm {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 8px;
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 12px;
+            min-width: 200px;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            display: none;
+        }
+        
+        .reset-confirm.show {
+            display: block;
+        }
+        
+        .reset-confirm p {
+            font-size: 12px;
+            margin-bottom: 10px;
+            color: #fbbf24;
+        }
+        
+        .reset-confirm-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .reset-confirm-buttons button {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 12px;
         }
 
         /* Сетка игроков */
@@ -153,6 +245,7 @@
             border: 1px solid rgba(255,255,255,0.1);
             touch-action: manipulation;
             position: relative;
+            color: #ffffff;
         }
 
         .player-card:active {
@@ -170,6 +263,7 @@
             font-size: 14px;
             margin-bottom: 6px;
             word-break: break-word;
+            color: #ffffff;
         }
 
         .player-role {
@@ -189,7 +283,7 @@
         .player-status {
             font-size: 10px;
             margin-top: 6px;
-            color: #aaa;
+            color: #ccc;
         }
 
         /* Фаза игры */
@@ -245,6 +339,7 @@
             display: block;
             margin-bottom: 8px;
             font-size: 14px;
+            color: #ffd966;
         }
 
         .action-group select {
@@ -255,6 +350,7 @@
             font-size: 14px;
             margin-bottom: 8px;
             background: rgba(255,255,255,0.95);
+            color: #1a1a2e;
         }
 
         .selected-badge {
@@ -285,6 +381,11 @@
             margin: 15px 0;
         }
 
+        .day-actions-panel h3 {
+            color: #ffd966;
+            margin-bottom: 12px;
+        }
+
         .vote-select {
             width: 100%;
             padding: 12px;
@@ -293,6 +394,7 @@
             font-size: 14px;
             margin-bottom: 10px;
             background: rgba(255,255,255,0.95);
+            color: #1a1a2e;
         }
 
         /* Результаты ночи */
@@ -302,6 +404,16 @@
             padding: 15px;
             margin: 15px 0;
             text-align: center;
+            color: #ffffff;
+        }
+
+        .night-result h3 {
+            color: #ffd966;
+            margin-bottom: 10px;
+        }
+
+        .night-result p {
+            color: #ffffff;
         }
 
         /* Лог */
@@ -320,6 +432,7 @@
             border-bottom: 1px solid rgba(255,255,255,0.1);
             word-break: break-word;
             animation: fadeIn 0.2s ease-out;
+            color: #e2e8f0;
         }
 
         @keyframes fadeIn {
@@ -340,6 +453,7 @@
             padding: 5px 10px;
             border-radius: 20px;
             font-size: 11px;
+            color: #ffffff;
         }
 
         /* Модальное окно */
@@ -365,6 +479,15 @@
             text-align: center;
         }
 
+        .modal-content h3 {
+            color: #ffd966;
+            margin-bottom: 12px;
+        }
+
+        .modal-content p {
+            color: #ffffff;
+        }
+
         .modal-content button {
             margin-top: 16px;
             width: 100%;
@@ -380,10 +503,35 @@
             border-radius: 12px;
             margin-bottom: 15px;
             font-size: 12px;
+            color: #ffffff;
         }
 
         .save-status {
             color: #2ed573;
+        }
+
+        /* Селекты внутри карточек игроков */
+        .player-card select {
+            font-size: 10px;
+            padding: 4px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.9);
+            color: #1a1a2e;
+            border: none;
+        }
+
+        .player-card button {
+            padding: 4px 8px;
+            font-size: 10px;
+            min-height: auto;
+        }
+
+        .player-actions {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            margin-top: 8px;
+            flex-wrap: wrap;
         }
 
         /* Адаптивность */
@@ -398,8 +546,11 @@
                 flex-direction: column;
             }
             .control-panel input,
-            .control-panel button {
+            .main-buttons {
                 width: 100%;
+            }
+            .main-buttons button {
+                flex: 1;
             }
             .players-grid {
                 gap: 8px;
@@ -410,6 +561,9 @@
             button {
                 padding: 10px 16px;
                 font-size: 13px;
+            }
+            .reset-trigger {
+                justify-content: center;
             }
         }
     </style>
@@ -427,9 +581,22 @@
         <div class="card">
             <div class="control-panel">
                 <input type="text" id="player-name-input" placeholder="Введите имя игрока">
-                <button id="add-player-btn" class="primary">➕ Добавить</button>
-                <button id="random-roles-btn" class="warning">🎲 Случайные роли</button>
-                <button id="reset-game-btn" class="danger">🔄 Сбросить всё</button>
+                <div class="main-buttons">
+                    <button id="add-player-btn" class="primary">➕ Добавить</button>
+                    <button id="new-game-btn" class="secondary">🎮 Новая игра</button>
+                </div>
+                <div class="reset-button-wrapper">
+                    <div class="reset-trigger" id="reset-trigger">
+                        🔧 Сброс
+                    </div>
+                    <div class="reset-confirm" id="reset-confirm">
+                        <p>⚠️ Удалить ВСЕХ игроков и начать заново?</p>
+                        <div class="reset-confirm-buttons">
+                            <button id="reset-confirm-yes" class="danger">Да, сбросить</button>
+                            <button id="reset-confirm-no" class="outline">Отмена</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -498,8 +665,9 @@
             <div id="log" class="log"></div>
         </div>
         
-        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 12px; font-size: 11px; text-align: center;">
-            💡 Подсказка: Нажмите на карточку игрока, чтобы увидеть его роль
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 12px; font-size: 11px; text-align: center; color: #ccc;">
+            💡 Подсказка: Нажмите на карточку игрока, чтобы увидеть его роль<br>
+            🎮 "Новая игра" — сброс прогресса, но игроки остаются | 🔧 "Сброс" — удаляет всех игроков
         </div>
     </div>
 
@@ -541,7 +709,7 @@
         // ==================== СОСТОЯНИЕ ИГРЫ ====================
         let game = {
             players: [],
-            currentPhase: 'night', // night, day, gameover
+            currentPhase: 'night',
             logMessages: [],
             nightActions: {
                 mafiaKill: null,
@@ -612,23 +780,60 @@
             }
         }
 
-        function resetGame() {
-            if (confirm('⚠️ Вы уверены? Все данные игры будут потеряны!')) {
-                localStorage.removeItem(STORAGE_KEY);
-                game = {
-                    players: [],
-                    currentPhase: 'night',
-                    logMessages: [],
-                    nightActions: { mafiaKill: null, doctorSave: null, commissionerCheck: null },
-                    gameActive: true
-                };
+        // ==================== НОВАЯ ИГРА (сохраняем игроков) ====================
+        function newGame() {
+            if (game.players.length === 0) {
+                alert('Сначала добавьте игроков');
+                return;
+            }
+            
+            if (confirm('🎮 Начать новую игру?\n\nВсе текущие роли и прогресс будут сброшены, но игроки останутся. Вы сможете назначить новые роли.')) {
+                // Сохраняем имена игроков, сбрасываем всё остальное
+                const playerNames = game.players.map(p => ({
+                    id: p.id,
+                    name: p.name
+                }));
+                
+                game.players = playerNames.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    role: 'civilian',
+                    isAlive: true
+                }));
+                
+                game.currentPhase = 'night';
+                game.nightActions = { mafiaKill: null, doctorSave: null, commissionerCheck: null };
+                game.gameActive = true;
+                game.logMessages = [];
+                
+                addLogMessage('🎮 Новая игра! Назначьте роли игрокам или нажмите "Случайные роли".');
                 
                 renderPlayersList();
-                renderLog();
                 updateStats();
                 updatePhaseUI();
-                addLogMessage('🔄 Игра сброшена. Добавьте игроков.');
+                saveGame();
             }
+        }
+
+        // ==================== ПОЛНЫЙ СБРОС (удаляем всех игроков) ====================
+        function fullReset() {
+            game = {
+                players: [],
+                currentPhase: 'night',
+                logMessages: [],
+                nightActions: { mafiaKill: null, doctorSave: null, commissionerCheck: null },
+                gameActive: true
+            };
+            
+            renderPlayersList();
+            renderLog();
+            updateStats();
+            updatePhaseUI();
+            addLogMessage('🔄 Полный сброс. Все игроки удалены. Добавьте новых игроков.');
+            saveGame();
+            
+            // Закрываем окно подтверждения
+            document.getElementById('reset-confirm').classList.remove('show');
         }
 
         // ==================== ЛОГ ====================
@@ -757,7 +962,7 @@
                 addLogMessage(`🏆 ПОБЕДА ${winner.toUpperCase()}!`);
                 
                 const resultDiv = elements.nightResult;
-                resultDiv.innerHTML = `<h2 style="color: ${winner === 'мирные' ? '#2ed573' : '#ff4757'}">🏆 ПОБЕДА ${winner.toUpperCase()}!</h2>
+                resultDiv.innerHTML = `<h3 style="color: ${winner === 'мирные' ? '#2ed573' : '#ff4757'}">🏆 ПОБЕДА ${winner.toUpperCase()}!</h3>
                                        <p>${winner === 'мирные' ? 'Мафия уничтожена!' : 'Мафия захватила город!'}</p>`;
                 elements.nightResultCard.style.display = 'block';
                 updatePhaseUI();
@@ -1072,16 +1277,16 @@
                     <div class="player-name">${escapeHtml(player.name)}</div>
                     <div class="player-role ${roleColors[player.role] || roleColors.civilian}">${roleNames[player.role] || 'Мирный'}</div>
                     <div class="player-status">${player.role === 'left' ? '🚪 Отошёл' : (player.isAlive ? '❤️ Жив' : '💀 Мёртв')}</div>
-                    <div style="margin-top: 8px; display: flex; gap: 5px; justify-content: center;">
-                        <select onchange="setRole(${player.id}, this.value)" style="font-size: 10px; padding: 4px; border-radius: 8px;">
+                    <div class="player-actions">
+                        <select onchange="setRole(${player.id}, this.value)">
                             <option value="civilian" ${player.role === 'civilian' ? 'selected' : ''}>Мирный</option>
                             <option value="mafia" ${player.role === 'mafia' ? 'selected' : ''}>Мафия</option>
                             <option value="commissioner" ${player.role === 'commissioner' ? 'selected' : ''}>Комиссар</option>
                             <option value="doctor" ${player.role === 'doctor' ? 'selected' : ''}>Доктор</option>
                             <option value="left" ${player.role === 'left' ? 'selected' : ''}>Отошёл</option>
                         </select>
-                        <button onclick="toggleAlive(${player.id})" style="padding: 4px 8px; font-size: 10px; background: ${player.isAlive ? '#ef4444' : '#2ed573'}">${player.isAlive ? '💀' : '✨'}</button>
-                        <button onclick="removePlayer(${player.id})" style="padding: 4px 8px; font-size: 10px; background: #64748b;">🗑️</button>
+                        <button onclick="toggleAlive(${player.id})" style="background: ${player.isAlive ? '#ef4444' : '#2ed573'}">${player.isAlive ? '💀' : '✨'}</button>
+                        <button onclick="removePlayer(${player.id})" style="background: #64748b;">🗑️</button>
                     </div>
                 </div>
             `).join('');
@@ -1093,10 +1298,10 @@
             
             document.getElementById('modal-player-name').innerText = player.name;
             document.getElementById('modal-role-text').innerHTML = `
-                <strong style="font-size: 20px;">${roleNames[player.role] || 'Мирный'}</strong><br>
-                <small>${roleDescriptions[player.role] || 'Участвует в голосовании'}</small>
+                <strong style="font-size: 20px; color: #ffd966;">${roleNames[player.role] || 'Мирный'}</strong><br>
+                <small style="color: #ccc;">${roleDescriptions[player.role] || 'Участвует в голосовании'}</small>
                 <br><br>
-                <span>${player.role === 'left' ? '🚪 Не участвует' : (player.isAlive ? '❤️ Жив' : '💀 Мёртв')}</span>
+                <span style="color: #fff;">${player.role === 'left' ? '🚪 Не участвует' : (player.isAlive ? '❤️ Жив' : '💀 Мёртв')}</span>
             `;
             document.getElementById('role-modal').style.display = 'flex';
         }
@@ -1136,7 +1341,33 @@
                 }
             };
             document.getElementById('random-roles-btn').onclick = assignRandomRoles;
-            document.getElementById('reset-game-btn').onclick = resetGame;
+            document.getElementById('new-game-btn').onclick = newGame;
+            
+            // Кнопка сброса с выпадающим подтверждением
+            const resetTrigger = document.getElementById('reset-trigger');
+            const resetConfirm = document.getElementById('reset-confirm');
+            const resetConfirmYes = document.getElementById('reset-confirm-yes');
+            const resetConfirmNo = document.getElementById('reset-confirm-no');
+            
+            resetTrigger.onclick = (e) => {
+                e.stopPropagation();
+                resetConfirm.classList.toggle('show');
+            };
+            
+            resetConfirmYes.onclick = () => {
+                fullReset();
+            };
+            
+            resetConfirmNo.onclick = () => {
+                resetConfirm.classList.remove('show');
+            };
+            
+            // Закрываем при клике вне
+            document.addEventListener('click', (e) => {
+                if (!resetTrigger.contains(e.target) && !resetConfirm.contains(e.target)) {
+                    resetConfirm.classList.remove('show');
+                }
+            });
             
             // Фазы
             document.getElementById('night-btn').onclick = () => setPhase('night');
@@ -1161,6 +1392,7 @@
         window.removePlayer = removePlayer;
         window.showRole = showRole;
         window.closeModal = closeModal;
+        window.assignRandomRoles = assignRandomRoles;
         
         document.addEventListener('DOMContentLoaded', init);
     </script>

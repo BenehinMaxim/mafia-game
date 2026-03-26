@@ -1,404 +1,857 @@
-// script.js - полная версия с сохранением состояния и кнопкой сброса
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мафия — Ведущий</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-// ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
-let players = [];
-let currentPhase = 'night'; // 'night' или 'day'
-let logMessages = [];
-let nightActions = {
-  mafiaKill: null,
-  commissionerCheck: null,
-  doctorSave: null
-};
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-// Элементы DOM
-const playersListEl = document.getElementById('players-list');
-const logEl = document.getElementById('log');
-const phaseTitleEl = document.getElementById('phase-title');
-const nightActionsDiv = document.getElementById('night-actions');
-const voteDiv = document.getElementById('vote');
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            padding: 30px;
+        }
 
-// Ключ для localStorage
-const STORAGE_KEY = 'mafia_game_state';
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
 
-// ==================== СОХРАНЕНИЕ И ЗАГРУЗКА ====================
-function saveGameState() {
-  const state = {
-    players: players,
-    currentPhase: currentPhase,
-    logMessages: logMessages,
-    nightActions: nightActions,
-    timestamp: new Date().toISOString()
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  console.log('✅ Игра сохранена');
-}
+        h2 {
+            color: #555;
+            margin: 20px 0 15px 0;
+            font-size: 1.5em;
+        }
 
-function loadGameState() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) return false;
-  
-  try {
-    const state = JSON.parse(saved);
-    players = state.players;
-    currentPhase = state.currentPhase;
-    logMessages = state.logMessages;
-    nightActions = state.nightActions || {
-      mafiaKill: null,
-      commissionerCheck: null,
-      doctorSave: null
-    };
-    
-    // Обновляем интерфейс
-    renderPlayersList();
-    renderLog();
-    updatePhaseUI();
-    return true;
-  } catch (e) {
-    console.error('Ошибка загрузки:', e);
-    return false;
-  }
-}
+        h3 {
+            color: #666;
+            margin: 20px 0 10px 0;
+        }
 
-function resetGame() {
-  if (confirm('⚠️ Вы уверены? Все данные игры будут потеряны!')) {
-    // Очищаем localStorage
-    localStorage.removeItem(STORAGE_KEY);
-    
-    // Сбрасываем переменные
-    players = [];
-    currentPhase = 'night';
-    logMessages = [];
-    nightActions = {
-      mafiaKill: null,
-      commissionerCheck: null,
-      doctorSave: null
-    };
-    
-    // Обновляем UI
-    renderPlayersList();
-    renderLog();
-    updatePhaseUI();
-    
-    addLogMessage('🔄 Игра сброшена. Создайте новых игроков.');
-    console.log('🔄 Игра сброшена');
-  }
-}
+        h4 {
+            color: #764ba2;
+            margin-bottom: 10px;
+        }
 
-// ==================== ЛОГ ====================
-function addLogMessage(message) {
-  const timestamp = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-  logMessages.unshift(`[${timestamp}] ${message}`);
-  // Ограничиваем лог 100 сообщениями
-  if (logMessages.length > 100) logMessages.pop();
-  renderLog();
-  saveGameState();
-}
+        /* Панель управления */
+        .control-panel {
+            background: #f7f9fc;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
 
-function renderLog() {
-  if (!logEl) return;
-  logEl.innerHTML = logMessages.map(msg => `<div class="log-entry">${msg}</div>`).join('');
-}
+        .control-panel input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 15px;
+            border: 2px solid #e0e7ff;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
 
-// ==================== ИГРОКИ ====================
-function addPlayer(name) {
-  if (!name || name.trim() === '') {
-    alert('Введите имя игрока');
-    return;
-  }
-  
-  if (players.find(p => p.name === name)) {
-    alert('Игрок с таким именем уже существует');
-    return;
-  }
-  
-  players.push({
-    id: Date.now() + Math.random(),
-    name: name,
-    role: null,
-    isAlive: true,
-    isLeft: false,
-    voteTarget: null
-  });
-  
-  renderPlayersList();
-  addLogMessage(`👤 Добавлен игрок: ${name}`);
-  saveGameState();
-}
+        .control-panel input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
 
-function removePlayer(playerId) {
-  const player = players.find(p => p.id === playerId);
-  if (player && confirm(`Удалить игрока ${player.name}?`)) {
-    players = players.filter(p => p.id !== playerId);
-    renderPlayersList();
-    addLogMessage(`❌ Удалён игрок: ${player.name}`);
-    saveGameState();
-  }
-}
+        .control-panel button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
 
-function setRole(playerId, role) {
-  const player = players.find(p => p.id === playerId);
-  if (!player) return;
-  
-  player.role = role;
-  renderPlayersList();
-  addLogMessage(`🎭 Игрок ${player.name} получил роль: ${getRoleName(role)}`);
-  saveGameState();
-}
+        #add-player-btn {
+            background: #10b981;
+            color: white;
+        }
 
-function getRoleName(role) {
-  const roles = {
-    'mafia': '🔪 Мафия',
-    'commissioner': '🔍 Комиссар',
-    'doctor': '💊 Доктор',
-    'civilian': '👨🌾 Мирный',
-    'left': '🚪 Отошёл'
-  };
-  return roles[role] || role;
-}
+        #add-player-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
 
-function toggleAlive(playerId) {
-  const player = players.find(p => p.id === playerId);
-  if (!player) return;
-  
-  player.isAlive = !player.isAlive;
-  if (!player.isAlive) {
-    addLogMessage(`💀 Игрок ${player.name} убит`);
-  } else {
-    addLogMessage(`✨ Игрок ${player.name} воскрешён`);
-  }
-  renderPlayersList();
-  saveGameState();
-}
+        #toggle-phase-btn {
+            background: #8b5cf6;
+            color: white;
+        }
 
-// ==================== ФАЗЫ ИГРЫ ====================
-function setPhase(phase) {
-  currentPhase = phase;
-  updatePhaseUI();
-  addLogMessage(phase === 'night' ? '🌙 Наступила ночь' : '☀️ Наступил день');
-  saveGameState();
-}
+        #toggle-phase-btn:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+        }
 
-function updatePhaseUI() {
-  if (phaseTitleEl) {
-    phaseTitleEl.textContent = currentPhase === 'night' ? '🌙 Ночь' : '☀️ День';
-  }
-  
-  if (nightActionsDiv) {
-    nightActionsDiv.style.display = currentPhase === 'night' ? 'block' : 'none';
-  }
-  if (voteDiv) {
-    voteDiv.style.display = currentPhase === 'day' ? 'block' : 'none';
-  }
-}
+        .reset-btn {
+            background-color: #dc2626 !important;
+            color: white !important;
+        }
 
-// ==================== НОЧНЫЕ ДЕЙСТВИЯ ====================
-function setMafiaKill(playerId) {
-  if (currentPhase !== 'night') return;
-  
-  const player = players.find(p => p.id === playerId);
-  if (!player || !player.isAlive) return;
-  
-  nightActions.mafiaKill = playerId;
-  addLogMessage(`🔪 Мафия выбрала жертву: ${player.name}`);
-  renderNightActionsUI();
-  saveGameState();
-}
+        .reset-btn:hover {
+            background-color: #b91c1c !important;
+        }
 
-function setCommissionerCheck(playerId) {
-  if (currentPhase !== 'night') return;
-  
-  const player = players.find(p => p.id === playerId);
-  if (!player || !player.isAlive) return;
-  
-  nightActions.commissionerCheck = playerId;
-  const role = player.role === 'mafia' ? 'МАФИЯ' : 'мирный';
-  addLogMessage(`🔍 Комиссар проверил ${player.name} — это ${role}`);
-  renderNightActionsUI();
-  saveGameState();
-}
+        /* Заголовок фазы */
+        .phase-header {
+            text-align: center;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
 
-function setDoctorSave(playerId) {
-  if (currentPhase !== 'night') return;
-  
-  const player = players.find(p => p.id === playerId);
-  if (!player || !player.isAlive) return;
-  
-  nightActions.doctorSave = playerId;
-  addLogMessage(`💊 Доктор лечит: ${player.name}`);
-  renderNightActionsUI();
-  saveGameState();
-}
+        .phase-night {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #fbbf24;
+        }
 
-function resolveNight() {
-  if (currentPhase !== 'night') return;
-  
-  const killedPlayer = players.find(p => p.id === nightActions.mafiaKill);
-  const savedPlayer = players.find(p => p.id === nightActions.doctorSave);
-  
-  if (killedPlayer && killedPlayer.id !== savedPlayer?.id) {
-    killedPlayer.isAlive = false;
-    addLogMessage(`💀 ${killedPlayer.name} был убит мафией!`);
-  } else if (killedPlayer && savedPlayer && killedPlayer.id === savedPlayer.id) {
-    addLogMessage(`💊 Доктор спас ${killedPlayer.name} от смерти!`);
-  }
-  
-  // Сбрасываем ночные действия
-  nightActions = {
-    mafiaKill: null,
-    commissionerCheck: null,
-    doctorSave: null
-  };
-  
-  setPhase('day');
-  renderPlayersList();
-  renderNightActionsUI();
-  saveGameState();
-}
+        .phase-day {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #1e293b;
+        }
 
-function renderNightActionsUI() {
-  const container = document.getElementById('night-actions-ui');
-  if (!container) return;
-  
-  const alivePlayers = players.filter(p => p.isAlive);
-  
-  container.innerHTML = `
-    <div class="night-action-group">
-      <h4>🔪 Мафия (выберите жертву)</h4>
-      <select id="mafia-kill-select">
-        <option value="">-- Выбрать --</option>
-        ${alivePlayers.map(p => `<option value="${p.id}" ${nightActions.mafiaKill === p.id ? 'selected' : ''}>${p.name}</option>`).join('')}
-      </select>
-      <button onclick="setMafiaKill(parseInt(document.getElementById('mafia-kill-select').value))">Подтвердить</button>
+        /* Список игроков */
+        #players-list {
+            margin: 20px 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        .player-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+            transition: all 0.3s;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .player-card.dead {
+            opacity: 0.5;
+            background: #f1f5f9;
+            filter: grayscale(0.2);
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .player-info strong {
+            font-size: 18px;
+            color: #1e293b;
+        }
+
+        .role-badge {
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .player-card.dead .status-badge {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .player-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .player-actions select {
+            padding: 6px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .kill-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .kill-btn:hover {
+            background: #dc2626;
+            transform: scale(0.95);
+        }
+
+        .remove-btn {
+            background: #94a3b8;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .remove-btn:hover {
+            background: #64748b;
+        }
+
+        /* Ночные действия */
+        #night-actions-ui {
+            background: #fef9e3;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 2px solid #fde047;
+        }
+
+        .night-action-group {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #8b5cf6;
+        }
+
+        .night-action-group select {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        .night-action-group button {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .night-action-group button:hover {
+            background: #7c3aed;
+        }
+
+        .resolve-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .resolve-btn:hover {
+            background: #059669;
+        }
+
+        /* Лог */
+        #log {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .log-entry {
+            padding: 6px 0;
+            border-bottom: 1px solid #334155;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Информационная панель */
+        .info-bar {
+            background: #f1f5f9;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .save-status {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .control-panel {
+                flex-direction: column;
+            }
+            
+            .control-panel input,
+            .control-panel button {
+                width: 100%;
+            }
+            
+            .player-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        /* Скроллбар */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 Ведущий Мафии</h1>
+        <div class="info-bar">
+            <span>📀 Автосохранение включено</span>
+            <span class="save-status">✅ Данные сохраняются автоматически</span>
+        </div>
+
+        <!-- Панель управления -->
+        <div class="control-panel">
+            <input type="text" id="player-name-input" placeholder="Введите имя игрока">
+            <button id="add-player-btn">➕ Добавить игрока</button>
+            <button id="toggle-phase-btn">🌙/☀️ Сменить фазу</button>
+        </div>
+
+        <!-- Заголовок фазы -->
+        <div id="phase-header" class="phase-header phase-night">
+            🌙 Ночь
+        </div>
+
+        <!-- Список игроков -->
+        <h2>📋 Список игроков</h2>
+        <div id="players-list"></div>
+
+        <!-- Панель ночных действий -->
+        <div id="night-actions-ui" style="display: none;"></div>
+
+        <!-- Лог событий -->
+        <h2>📝 Лог событий</h2>
+        <div id="log"></div>
+        
+        <!-- Подсказка -->
+        <div style="margin-top: 20px; padding: 10px; background: #fef3c7; border-radius: 8px; font-size: 12px; color: #92400e;">
+            💡 Подсказка: Все данные автоматически сохраняются. При обновлении страницы игра продолжается с того же места.
+        </div>
     </div>
-    <div class="night-action-group">
-      <h4>🔍 Комиссар (проверить игрока)</h4>
-      <select id="commissioner-check-select">
-        <option value="">-- Выбрать --</option>
-        ${alivePlayers.map(p => `<option value="${p.id}" ${nightActions.commissionerCheck === p.id ? 'selected' : ''}>${p.name}</option>`).join('')}
-      </select>
-      <button onclick="setCommissionerCheck(parseInt(document.getElementById('commissioner-check-select').value))">Подтвердить</button>
-    </div>
-    <div class="night-action-group">
-      <h4>💊 Доктор (кого лечить)</h4>
-      <select id="doctor-save-select">
-        <option value="">-- Выбрать --</option>
-        ${alivePlayers.map(p => `<option value="${p.id}" ${nightActions.doctorSave === p.id ? 'selected' : ''}>${p.name}</option>`).join('')}
-      </select>
-      <button onclick="setDoctorSave(parseInt(document.getElementById('doctor-save-select').value))">Подтвердить</button>
-    </div>
-    <button class="resolve-btn" onclick="resolveNight()">🌙 Завершить ночь → день</button>
-  `;
-}
 
-// ==================== ОТРИСОВКА ИГРОКОВ ====================
-function renderPlayersList() {
-  if (!playersListEl) return;
-  
-  if (players.length === 0) {
-    playersListEl.innerHTML = '<div class="empty-state">Нет игроков. Добавьте игроков выше.</div>';
-    return;
-  }
-  
-  playersListEl.innerHTML = players.map(player => `
-    <div class="player-card ${!player.isAlive ? 'dead' : ''}">
-      <div class="player-info">
-        <strong>${player.name}</strong>
-        <span class="role-badge">${player.role ? getRoleName(player.role) : '⚡ Без роли'}</span>
-        <span class="status-badge">${player.isAlive ? '❤️ Жив' : '💀 Мёртв'}</span>
-      </div>
-      <div class="player-actions">
-        <select onchange="setRole(${player.id}, this.value)" ${!player.isAlive ? 'disabled' : ''}>
-          <option value="">Назначить роль</option>
-          <option value="mafia" ${player.role === 'mafia' ? 'selected' : ''}>🔪 Мафия</option>
-          <option value="commissioner" ${player.role === 'commissioner' ? 'selected' : ''}>🔍 Комиссар</option>
-          <option value="doctor" ${player.role === 'doctor' ? 'selected' : ''}>💊 Доктор</option>
-          <option value="civilian" ${player.role === 'civilian' ? 'selected' : ''}>👨🌾 Мирный</option>
-          <option value="left" ${player.role === 'left' ? 'selected' : ''}>🚪 Отошёл</option>
-        </select>
-        <button onclick="toggleAlive(${player.id})" class="kill-btn">${player.isAlive ? '💀 Убить' : '✨ Воскресить'}</button>
-        <button onclick="removePlayer(${player.id})" class="remove-btn">🗑️</button>
-      </div>
-    </div>
-  `).join('');
-}
+    <script>
+        // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
+        let players = [];
+        let currentPhase = 'night'; // 'night' или 'day'
+        let logMessages = [];
+        let nightActions = {
+            mafiaKill: null,
+            commissionerCheck: null,
+            doctorSave: null
+        };
 
-// ==================== ДОБАВЛЕНИЕ КНОПКИ СБРОСА В HTML ====================
-function addResetButton() {
-  // Ищем контейнер для кнопок управления
-  const controlPanel = document.querySelector('.control-panel') || document.getElementById('game-controls');
-  
-  if (controlPanel) {
-    const resetBtn = document.createElement('button');
-    resetBtn.id = 'reset-game-btn';
-    resetBtn.textContent = '🔄 Сбросить всё';
-    resetBtn.className = 'reset-btn';
-    resetBtn.onclick = resetGame;
-    resetBtn.style.marginLeft = '10px';
-    resetBtn.style.padding = '8px 16px';
-    resetBtn.style.backgroundColor = '#dc2626';
-    resetBtn.style.color = 'white';
-    resetBtn.style.border = 'none';
-    resetBtn.style.borderRadius = '6px';
-    resetBtn.style.cursor = 'pointer';
-    controlPanel.appendChild(resetBtn);
-  }
-}
+        // Элементы DOM
+        const playersListEl = document.getElementById('players-list');
+        const logEl = document.getElementById('log');
+        const phaseHeaderEl = document.getElementById('phase-header');
+        const nightActionsDiv = document.getElementById('night-actions-ui');
 
-// ==================== ИНИЦИАЛИЗАЦИЯ ====================
-function init() {
-  // Загружаем сохранённое состояние или создаём новое
-  const loaded = loadGameState();
-  
-  if (!loaded) {
-    addLogMessage('🎭 Приложение готово! Создайте игроков.');
-  } else {
-    addLogMessage('📀 Загружено сохранённое состояние игры');
-  }
-  
-  // Добавляем кнопку сброса
-  addResetButton();
-  
-  // Настраиваем обработчики для добавления игроков
-  const addPlayerBtn = document.getElementById('add-player-btn');
-  const playerNameInput = document.getElementById('player-name-input');
-  
-  if (addPlayerBtn && playerNameInput) {
-    addPlayerBtn.onclick = () => {
-      addPlayer(playerNameInput.value);
-      playerNameInput.value = '';
-    };
-    
-    playerNameInput.onkeypress = (e) => {
-      if (e.key === 'Enter') {
-        addPlayer(playerNameInput.value);
-        playerNameInput.value = '';
-      }
-    };
-  }
-  
-  // Кнопка смены фазы
-  const togglePhaseBtn = document.getElementById('toggle-phase-btn');
-  if (togglePhaseBtn) {
-    togglePhaseBtn.onclick = () => {
-      setPhase(currentPhase === 'night' ? 'day' : 'night');
-    };
-  }
-  
-  // Рендерим UI ночных действий
-  renderNightActionsUI();
-}
+        // Ключ для localStorage
+        const STORAGE_KEY = 'mafia_game_state';
 
-// Запускаем при загрузке страницы
-document.addEventListener('DOMContentLoaded', init);
+        // ==================== СОХРАНЕНИЕ И ЗАГРУЗКА ====================
+        function saveGameState() {
+            const state = {
+                players: players,
+                currentPhase: currentPhase,
+                logMessages: logMessages,
+                nightActions: nightActions,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            console.log('✅ Игра сохранена');
+        }
 
-// Делаем функции глобальными для доступа из HTML
-window.addPlayer = addPlayer;
-window.removePlayer = removePlayer;
-window.setRole = setRole;
-window.toggleAlive = toggleAlive;
-window.setPhase = setPhase;
-window.setMafiaKill = setMafiaKill;
-window.setCommissionerCheck = setCommissionerCheck;
-window.setDoctorSave = setDoctorSave;
-window.resolveNight = resolveNight;
-window.resetGame = resetGame;
+        function loadGameState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return false;
+            
+            try {
+                const state = JSON.parse(saved);
+                players = state.players;
+                currentPhase = state.currentPhase;
+                logMessages = state.logMessages;
+                nightActions = state.nightActions || {
+                    mafiaKill: null,
+                    commissionerCheck: null,
+                    doctorSave: null
+                };
+                
+                // Обновляем интерфейс
+                renderPlayersList();
+                renderLog();
+                updatePhaseUI();
+                return true;
+            } catch (e) {
+                console.error('Ошибка загрузки:', e);
+                return false;
+            }
+        }
+
+        function resetGame() {
+            if (confirm('⚠️ Вы уверены? Все данные игры будут потеряны!')) {
+                // Очищаем localStorage
+                localStorage.removeItem(STORAGE_KEY);
+                
+                // Сбрасываем переменные
+                players = [];
+                currentPhase = 'night';
+                logMessages = [];
+                nightActions = {
+                    mafiaKill: null,
+                    commissionerCheck: null,
+                    doctorSave: null
+                };
+                
+                // Обновляем UI
+                renderPlayersList();
+                renderLog();
+                updatePhaseUI();
+                
+                addLogMessage('🔄 Игра сброшена. Создайте новых игроков.');
+                console.log('🔄 Игра сброшена');
+            }
+        }
+
+        // ==================== ЛОГ ====================
+        function addLogMessage(message) {
+            const timestamp = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            logMessages.unshift(`[${timestamp}] ${message}`);
+            // Ограничиваем лог 100 сообщениями
+            if (logMessages.length > 100) logMessages.pop();
+            renderLog();
+            saveGameState();
+        }
+
+        function renderLog() {
+            if (!logEl) return;
+            logEl.innerHTML = logMessages.map(msg => `<div class="log-entry">${escapeHtml(msg)}</div>`).join('');
+        }
+
+        // ==================== ИГРОКИ ====================
+        function addPlayer(name) {
+            if (!name || name.trim() === '') {
+                alert('Введите имя игрока');
+                return;
+            }
+            
+            if (players.find(p => p.name === name)) {
+                alert('Игрок с таким именем уже существует');
+                return;
+            }
+            
+            players.push({
+                id: Date.now(),
+                name: name.trim(),
+                role: null,
+                isAlive: true,
+                isLeft: false,
+                voteTarget: null
+            });
+            
+            renderPlayersList();
+            addLogMessage(`👤 Добавлен игрок: ${name}`);
+            saveGameState();
+        }
+
+        function removePlayer(playerId) {
+            const player = players.find(p => p.id === playerId);
+            if (player && confirm(`Удалить игрока ${player.name}?`)) {
+                players = players.filter(p => p.id !== playerId);
+                renderPlayersList();
+                addLogMessage(`❌ Удалён игрок: ${player.name}`);
+                saveGameState();
+            }
+        }
+
+        function setRole(playerId, role) {
+            const player = players.find(p => p.id === playerId);
+            if (!player) return;
+            
+            if (!role) {
+                player.role = null;
+                addLogMessage(`🎭 Игрок ${player.name} остался без роли`);
+            } else {
+                player.role = role;
+                addLogMessage(`🎭 Игрок ${player.name} получил роль: ${getRoleName(role)}`);
+            }
+            renderPlayersList();
+            saveGameState();
+        }
+
+        function getRoleName(role) {
+            const roles = {
+                'mafia': '🔪 Мафия',
+                'commissioner': '🔍 Комиссар',
+                'doctor': '💊 Доктор',
+                'civilian': '👨🌾 Мирный',
+                'left': '🚪 Отошёл'
+            };
+            return roles[role] || role;
+        }
+
+        function toggleAlive(playerId) {
+            const player = players.find(p => p.id === playerId);
+            if (!player) return;
+            
+            player.isAlive = !player.isAlive;
+            if (!player.isAlive) {
+                addLogMessage(`💀 Игрок ${player.name} убит`);
+            } else {
+                addLogMessage(`✨ Игрок ${player.name} воскрешён`);
+            }
+            renderPlayersList();
+            saveGameState();
+        }
+
+        // ==================== ФАЗЫ ИГРЫ ====================
+        function setPhase(phase) {
+            currentPhase = phase;
+            updatePhaseUI();
+            addLogMessage(phase === 'night' ? '🌙 Наступила ночь' : '☀️ Наступил день');
+            saveGameState();
+        }
+
+        function updatePhaseUI() {
+            if (phaseHeaderEl) {
+                phaseHeaderEl.textContent = currentPhase === 'night' ? '🌙 Ночь' : '☀️ День';
+                phaseHeaderEl.className = currentPhase === 'night' ? 'phase-header phase-night' : 'phase-header phase-day';
+            }
+            
+            if (nightActionsDiv) {
+                nightActionsDiv.style.display = currentPhase === 'night' ? 'block' : 'none';
+            }
+            
+            if (currentPhase === 'night') {
+                renderNightActionsUI();
+            }
+        }
+
+        // ==================== НОЧНЫЕ ДЕЙСТВИЯ ====================
+        function setMafiaKill(playerId) {
+            if (currentPhase !== 'night') return;
+            
+            const player = players.find(p => p.id === playerId);
+            if (!player || !player.isAlive) return;
+            
+            nightActions.mafiaKill = playerId;
+            addLogMessage(`🔪 Мафия выбрала жертву: ${player.name}`);
+            renderNightActionsUI();
+            saveGameState();
+        }
+
+        function setCommissionerCheck(playerId) {
+            if (currentPhase !== 'night') return;
+            
+            const player = players.find(p => p.id === playerId);
+            if (!player || !player.isAlive) return;
+            
+            nightActions.commissionerCheck = playerId;
+            const role = player.role === 'mafia' ? 'МАФИЯ' : 'мирный';
+            addLogMessage(`🔍 Комиссар проверил ${player.name} — это ${role}`);
+            renderNightActionsUI();
+            saveGameState();
+        }
+
+        function setDoctorSave(playerId) {
+            if (currentPhase !== 'night') return;
+            
+            const player = players.find(p => p.id === playerId);
+            if (!player || !player.isAlive) return;
+            
+            nightActions.doctorSave = playerId;
+            addLogMessage(`💊 Доктор лечит: ${player.name}`);
+            renderNightActionsUI();
+            saveGameState();
+        }
+
+        function resolveNight() {
+            if (currentPhase !== 'night') return;
+            
+            const killedPlayer = players.find(p => p.id === nightActions.mafiaKill);
+            const savedPlayer = players.find(p => p.id === nightActions.doctorSave);
+            
+            if (killedPlayer && killedPlayer.id !== savedPlayer?.id) {
+                killedPlayer.isAlive = false;
+                addLogMessage(`💀 ${killedPlayer.name} был убит мафией!`);
+            } else if (killedPlayer && savedPlayer && killedPlayer.id === savedPlayer.id) {
+                addLogMessage(`💊 Доктор спас ${killedPlayer.name} от смерти!`);
+            }
+            
+            // Сбрасываем ночные действия
+            nightActions = {
+                mafiaKill: null,
+                commissionerCheck: null,
+                doctorSave: null
+            };
+            
+            setPhase('day');
+            renderPlayersList();
+            saveGameState();
+        }
+
+        function renderNightActionsUI() {
+            if (!nightActionsDiv) return;
+            
+            const alivePlayers = players.filter(p => p.isAlive);
+            
+            if (alivePlayers.length === 0) {
+                nightActionsDiv.innerHTML = '<p style="text-align: center;">Нет живых игроков</p>';
+                return;
+            }
+            
+            nightActionsDiv.innerHTML = `
+                <h3>🌙 Ночные действия</h3>
+                <div class="night-action-group">
+                    <h4>🔪 Мафия (выберите жертву)</h4>
+                    <select id="mafia-kill-select">
+                        <option value="">-- Выбрать --</option>
+                        ${alivePlayers.map(p => `<option value="${p.id}" ${nightActions.mafiaKill === p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
+                    </select>
+                    <button onclick="setMafiaKill(parseInt(document.getElementById('mafia-kill-select').value))">Подтвердить</button>
+                </div>
+                <div class="night-action-group">
+                    <h4>🔍 Комиссар (проверить игрока)</h4>
+                    <select id="commissioner-check-select">
+                        <option value="">-- Выбрать --</option>
+                        ${alivePlayers.map(p => `<option value="${p.id}" ${nightActions.commissionerCheck === p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
+                    </select>
+                    <button onclick="setCommissionerCheck(parseInt(document.getElementById('commissioner-check-select').value))">Подтвердить</button>
+                </div>
+                <div class="night-action-group">
+                    <h4>💊 Доктор (кого лечить)</h4>
+                    <select id="doctor-save-select">
+                        <option value="">-- Выбрать --</option>
+                        ${alivePlayers.map(p => `<option value="${p.id}" ${nightActions.doctorSave === p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
+                    </select>
+                    <button onclick="setDoctorSave(parseInt(document.getElementById('doctor-save-select').value))">Подтвердить</button>
+                </div>
+                <button class="resolve-btn" onclick="resolveNight()">🌙 Завершить ночь → день</button>
+            `;
+        }
+
+        // ==================== ОТРИСОВКА ИГРОКОВ ====================
+        function renderPlayersList() {
+            if (!playersListEl) return;
+            
+            if (players.length === 0) {
+                playersListEl.innerHTML = '<div class="empty-state">👥 Нет игроков. Добавьте игроков выше.</div>';
+                return;
+            }
+            
+            playersListEl.innerHTML = players.map(player => `
+                <div class="player-card ${!player.isAlive ? 'dead' : ''}">
+                    <div class="player-info">
+                        <strong>${escapeHtml(player.name)}</strong>
+                        <span class="role-badge">${player.role ? getRoleName(player.role) : '⚡ Без роли'}</span>
+                        <span class="status-badge">${player.isAlive ? '❤️ Жив' : '💀 Мёртв'}</span>
+                    </div>
+                    <div class="player-actions">
+                        <select onchange="setRole(${player.id}, this.value)" ${!player.isAlive ? 'disabled' : ''}>
+                            <option value="">Назначить роль</option>
+                            <option value="mafia" ${player.role === 'mafia' ? 'selected' : ''}>🔪 Мафия</option>
+                            <option value="commissioner" ${player.role === 'commissioner' ? 'selected' : ''}>🔍 Комиссар</option>
+                            <option value="doctor" ${player.role === 'doctor' ? 'selected' : ''}>💊 Доктор</option>
+                            <option value="civilian" ${player.role === 'civilian' ? 'selected' : ''}>👨🌾 Мирный</option>
+                            <option value="left" ${player.role === 'left' ? 'selected' : ''}>🚪 Отошёл</option>
+                        </select>
+                        <button onclick="toggleAlive(${player.id})" class="kill-btn">${player.isAlive ? '💀 Убить' : '✨ Воскресить'}</button>
+                        <button onclick="removePlayer(${player.id})" class="remove-btn">🗑️ Удалить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function addResetButton() {
+            const controlPanel = document.querySelector('.control-panel');
+            if (controlPanel) {
+                // Проверяем, нет ли уже кнопки сброса
+                if (!document.getElementById('reset-game-btn')) {
+                    const resetBtn = document.createElement('button');
+                    resetBtn.id = 'reset-game-btn';
+                    resetBtn.textContent = '🔄 Сбросить всё';
+                    resetBtn.className = 'reset-btn';
+                    resetBtn.onclick = resetGame;
+                    controlPanel.appendChild(resetBtn);
+                }
+            }
+        }
+
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        function init() {
+            // Загружаем сохранённое состояние или создаём новое
+            const loaded = loadGameState();
+            
+            if (!loaded) {
+                addLogMessage('🎭 Приложение готово! Создайте игроков.');
+            } else {
+                addLogMessage('📀 Загружено сохранённое состояние игры');
+            }
+            
+            // Добавляем кнопку сброса
+            addResetButton();
+            
+            // Настраиваем обработчики для добавления игроков
+            const addPlayerBtn = document.getElementById('add-player-btn');
+            const playerNameInput = document.getElementById('player-name-input');
+            
+            if (addPlayerBtn && playerNameInput) {
+                addPlayerBtn.onclick = () => {
+                    addPlayer(playerNameInput.value);
+                    playerNameInput.value = '';
+                };
+                
+                playerNameInput.onkeypress = (e) => {
+                    if (e.key === 'Enter') {
+                        addPlayer(playerNameInput.value);
+                        playerNameInput.value = '';
+                    }
+                };
+            }
+            
+            // Кнопка смены фазы
+            const togglePhaseBtn = document.getElementById('toggle-phase-btn');
+            if (togglePhaseBtn) {
+                togglePhaseBtn.onclick = () => {
+                    setPhase(currentPhase === 'night' ? 'day' : 'night');
+                };
+            }
+            
+            // Рендерим UI ночных действий
+            if (currentPhase === 'night') {
+                renderNightActionsUI();
+            }
+        }
+
+        // Делаем функции глобальными для доступа из HTML
+        window.addPlayer = addPlayer;
+        window.removePlayer = removePlayer;
+        window.setRole = setRole;
+        window.toggleAlive = toggleAlive;
+        window.setPhase = setPhase;
+        window.setMafiaKill = setMafiaKill;
+        window.setCommissionerCheck = setCommissionerCheck;
+        window.setDoctorSave = setDoctorSave;
+        window.resolveNight = resolveNight;
+        window.resetGame = resetGame;
+
+        // Запускаем при загрузке страницы
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

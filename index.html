@@ -456,7 +456,7 @@
             color: #ffffff;
         }
 
-        /* Модальное окно */
+        /* Модальное окно для роли */
         .modal {
             display: none;
             position: fixed;
@@ -491,6 +491,74 @@
         .modal-content button {
             margin-top: 16px;
             width: 100%;
+        }
+
+        /* Модальное окно для результатов ночи */
+        .night-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            animation: fadeInModal 0.3s ease-out;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .night-modal-content {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 32px;
+            padding: 28px 24px;
+            max-width: 320px;
+            width: 85%;
+            text-align: center;
+            border: 2px solid #ffd966;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .night-modal-content h2 {
+            color: #ffd966;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .night-modal-content .result-message {
+            font-size: 18px;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 16px;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .night-modal-content .result-message.death {
+            background: rgba(220, 38, 38, 0.3);
+            border-left: 4px solid #ef4444;
+        }
+
+        .night-modal-content .result-message.saved {
+            background: rgba(46, 213, 115, 0.3);
+            border-left: 4px solid #2ed573;
+        }
+
+        .night-modal-content .result-message.peace {
+            background: rgba(245, 158, 11, 0.3);
+            border-left: 4px solid #f59e0b;
+        }
+
+        .night-modal-content button {
+            margin-top: 20px;
+            width: 100%;
+            background: #ffd966;
+            color: #1a1a2e;
+            font-size: 16px;
         }
 
         /* Инфо-панель */
@@ -564,6 +632,12 @@
             }
             .reset-trigger {
                 justify-content: center;
+            }
+            .night-modal-content h2 {
+                font-size: 1.4rem;
+            }
+            .night-modal-content .result-message {
+                font-size: 14px;
             }
         }
     </style>
@@ -648,7 +722,7 @@
             </div>
         </div>
 
-        <!-- Результаты ночи -->
+        <!-- Результаты ночи (скрытая панель) -->
         <div class="card" id="night-result-card" style="display: none;">
             <div id="night-result" class="night-result"></div>
         </div>
@@ -679,6 +753,15 @@
             <h3 id="modal-player-name"></h3>
             <p id="modal-role-text"></p>
             <button onclick="closeModal()">Понятно</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно для результатов ночи -->
+    <div id="night-modal" class="night-modal">
+        <div class="night-modal-content">
+            <h2>🌙 Итоги ночи</h2>
+            <div id="night-modal-message" class="result-message"></div>
+            <button onclick="closeNightModal()">Продолжить</button>
         </div>
     </div>
 
@@ -782,7 +865,7 @@
             }
         }
 
-        // ==================== НОВАЯ ИГРА (сохраняем игроков) ====================
+        // ==================== НОВАЯ ИГРА ====================
         function newGame() {
             if (game.players.length === 0) {
                 alert('Сначала добавьте игроков');
@@ -790,7 +873,6 @@
             }
             
             if (confirm('🎮 Начать новую игру?\n\nВсе текущие роли и прогресс будут сброшены, но игроки останутся. Вы сможете назначить новые роли.')) {
-                // Сохраняем имена игроков, сбрасываем всё остальное
                 const playerNames = game.players.map(p => ({
                     id: p.id,
                     name: p.name
@@ -817,7 +899,7 @@
             }
         }
 
-        // ==================== ПОЛНЫЙ СБРОС (удаляем всех игроков) ====================
+        // ==================== ПОЛНЫЙ СБРОС ====================
         function fullReset() {
             game = {
                 players: [],
@@ -833,8 +915,6 @@
             updatePhaseUI();
             addLogMessage('🔄 Полный сброс. Все игроки удалены. Добавьте новых игроков.');
             saveGame();
-            
-            // Закрываем окно подтверждения
             document.getElementById('reset-confirm').classList.remove('show');
         }
 
@@ -973,6 +1053,20 @@
             return false;
         }
 
+        // ==================== ПОКАЗ МОДАЛЬНОГО ОКНА РЕЗУЛЬТАТОВ НОЧИ ====================
+        function showNightModal(resultText, resultType) {
+            const modal = document.getElementById('night-modal');
+            const messageDiv = document.getElementById('night-modal-message');
+            
+            messageDiv.innerHTML = resultText;
+            messageDiv.className = 'result-message ' + resultType;
+            modal.style.display = 'flex';
+        }
+
+        function closeNightModal() {
+            document.getElementById('night-modal').style.display = 'none';
+        }
+
         // ==================== СЛУЧАЙНЫЕ РОЛИ ====================
         function assignRandomRoles() {
             const activePlayers = game.players.filter(p => p.role !== 'left');
@@ -999,7 +1093,6 @@
             const civilianCount = activePlayers.length - roles.length;
             for (let i = 0; i < civilianCount; i++) roles.push('civilian');
             
-            // Перемешиваем
             for (let i = roles.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [roles[i], roles[j]] = [roles[j], roles[i]];
@@ -1073,7 +1166,6 @@
         function refreshNightSelects() {
             const alivePlayers = getActivePlayers();
             
-            // Мафия
             if (isMafiaAlive()) {
                 elements.mafiaTarget.disabled = false;
                 elements.mafiaDisabled.style.display = 'none';
@@ -1087,7 +1179,6 @@
                 game.nightActions.mafiaKill = null;
             }
             
-            // Доктор
             if (isDoctorAlive()) {
                 elements.doctorTarget.disabled = false;
                 elements.doctorDisabled.style.display = 'none';
@@ -1101,7 +1192,6 @@
                 game.nightActions.doctorSave = null;
             }
             
-            // Комиссар
             if (isCommissionerAlive()) {
                 elements.commissionerTarget.disabled = false;
                 elements.commissionerDisabled.style.display = 'none';
@@ -1192,11 +1282,15 @@
             
             let killedId = game.nightActions.mafiaKill;
             let savedId = game.nightActions.doctorSave;
-            let resultHtml = '<h3>🌙 Итоги ночи</h3>';
+            let resultText = '';
+            let resultType = 'peace';
+            let victimName = '';
             
             if (killedId && savedId && killedId === savedId) {
-                resultHtml += `<p>💊 <strong>Доктор спас игрока от смерти!</strong></p>`;
-                addLogMessage(`💊 Доктор спас игрока от смерти`);
+                const savedPlayer = game.players.find(p => p.id === savedId);
+                resultText = `💊 Доктор спас ${savedPlayer?.name} от смерти!\n\n🌙 Ночь прошла без жертв.`;
+                resultType = 'saved';
+                addLogMessage(`💊 Доктор спас ${savedPlayer?.name} от смерти`);
                 killedId = null;
             }
             
@@ -1204,19 +1298,29 @@
                 const victim = game.players.find(p => p.id === killedId);
                 if (victim && victim.isAlive) {
                     victim.isAlive = false;
-                    resultHtml += `<p>💀 <strong style="color:#ff8888">Убит: ${victim.name}</strong> (${roleNames[victim.role]})</p>`;
+                    victimName = victim.name;
+                    resultText = `💀 Убит: ${victim.name}\n🎭 Роль: ${roleNames[victim.role]}\n\n🌙 Город потерял одного из жителей.`;
+                    resultType = 'death';
                     addLogMessage(`💀 Ночью убит ${victim.name} (${roleNames[victim.role]})`);
                 }
             } else if (game.nightActions.mafiaKill && savedId && game.nightActions.mafiaKill === savedId) {
-                resultHtml += `<p>🌙 Ночь прошла без жертв (доктор спас)</p>`;
+                if (!resultText) {
+                    resultText = `💊 Доктор спас игрока!\n\n🌙 Ночь прошла без жертв.`;
+                    resultType = 'saved';
+                }
             } else if (!game.nightActions.mafiaKill) {
-                resultHtml += `<p>🌙 Ночь прошла без жертв (мафия никого не выбрала)</p>`;
+                resultText = `🌙 Мафия не выбрала жертву...\n\nНочь прошла спокойно.`;
+                resultType = 'peace';
                 addLogMessage(`🌙 Ночь прошла без жертв`);
             } else {
-                resultHtml += `<p>🌙 Ночь прошла без жертв</p>`;
+                resultText = `🌙 Ночь прошла без жертв.`;
+                resultType = 'peace';
             }
             
-            elements.nightResult.innerHTML = resultHtml;
+            // Показываем модальное окно с результатами
+            showNightModal(resultText, resultType);
+            
+            elements.nightResult.innerHTML = `<h3>🌙 Итоги ночи</h3><p>${resultText.replace(/\n/g, '<br>')}</p>`;
             elements.nightResultCard.style.display = 'block';
             
             game.nightActions = { mafiaKill: null, doctorSave: null, commissionerCheck: null };
@@ -1226,8 +1330,23 @@
             
             if (checkWinCondition()) return;
             
-            setPhase('day');
+            // Не переключаем фазу сразу, ждём закрытия модального окна
+            window.pendingPhaseSwitch = true;
         }
+        
+        function continueAfterNightModal() {
+            if (window.pendingPhaseSwitch) {
+                window.pendingPhaseSwitch = false;
+                setPhase('day');
+            }
+        }
+        
+        // Переопределяем closeNightModal для переключения фазы
+        const originalCloseNightModal = closeNightModal;
+        window.closeNightModal = function() {
+            originalCloseNightModal();
+            continueAfterNightModal();
+        };
 
         // ==================== ДНЕВНОЕ ГОЛОСОВАНИЕ ====================
         function refreshDaySelect() {
@@ -1345,7 +1464,7 @@
             document.getElementById('random-roles-btn').onclick = assignRandomRoles;
             document.getElementById('new-game-btn').onclick = newGame;
             
-            // Кнопка сброса с выпадающим подтверждением
+            // Кнопка сброса
             const resetTrigger = document.getElementById('reset-trigger');
             const resetConfirm = document.getElementById('reset-confirm');
             const resetConfirmYes = document.getElementById('reset-confirm-yes');
@@ -1356,15 +1475,9 @@
                 resetConfirm.classList.toggle('show');
             };
             
-            resetConfirmYes.onclick = () => {
-                fullReset();
-            };
+            resetConfirmYes.onclick = () => fullReset();
+            resetConfirmNo.onclick = () => resetConfirm.classList.remove('show');
             
-            resetConfirmNo.onclick = () => {
-                resetConfirm.classList.remove('show');
-            };
-            
-            // Закрываем при клике вне
             document.addEventListener('click', (e) => {
                 if (!resetTrigger.contains(e.target) && !resetConfirm.contains(e.target)) {
                     resetConfirm.classList.remove('show');
@@ -1388,13 +1501,14 @@
             updatePhaseUI();
         }
         
-        // Глобальные функции для onclick
+        // Глобальные функции
         window.setRole = setRole;
         window.toggleAlive = toggleAlive;
         window.removePlayer = removePlayer;
         window.showRole = showRole;
         window.closeModal = closeModal;
         window.assignRandomRoles = assignRandomRoles;
+        window.closeNightModal = closeNightModal;
         
         document.addEventListener('DOMContentLoaded', init);
     </script>

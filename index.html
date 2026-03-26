@@ -355,6 +355,11 @@
             color: #1a1a2e;
         }
 
+        .vote-select:disabled {
+            opacity: 0.5;
+            background: rgba(255,255,255,0.7);
+        }
+
         .night-result {
             background: rgba(0,0,0,0.5);
             border-radius: 16px;
@@ -535,6 +540,16 @@
             margin-left: 10px;
         }
 
+        .vote-warning {
+            background: rgba(245, 158, 11, 0.2);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            text-align: center;
+            border-left: 4px solid #f59e0b;
+        }
+
         @media (max-width: 480px) {
             body { padding: 8px; }
             .card { padding: 12px; }
@@ -612,10 +627,10 @@
 
         <div class="card" id="day-actions-card" style="display: none;">
             <div class="day-actions-panel">
-                <h3>☀️ Дневное голосование</h3>
-                <div id="vote-warning" style="background: #f59e0b20; padding: 10px; border-radius: 12px; margin-bottom: 12px; font-size: 13px; text-align: center;"></div>
+                <h3>☀️ Дневное заседание</h3>
+                <div id="vote-warning" class="vote-warning"></div>
                 <select id="vote-target" class="vote-select"></select>
-                <button id="confirm-vote-btn" class="primary" style="width: 100%;">🗳️ Исключить игрока</button>
+                <button id="day-action-btn" class="primary" style="width: 100%;"></button>
             </div>
         </div>
 
@@ -636,7 +651,7 @@
         
         <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 12px; font-size: 11px; text-align: center; color: #ccc;">
             💡 Правила: 1-я ночь — знакомство с ролями, без убийств.<br>
-            ☀️ 1-е утро — только обсуждение, голосования нет.<br>
+            ☀️ 1-й день — только обсуждение, кнопка "Обсудили — пора спать".<br>
             🌙 Со 2-й ночи — мафия убивает, доктор лечит, комиссар проверяет.<br>
             🗳️ Со 2-го дня — начинается голосование.
         </div>
@@ -715,7 +730,8 @@
             doctorDisabled: document.getElementById('doctor-disabled'),
             commissionerDisabled: document.getElementById('commissioner-disabled'),
             nightNumber: document.getElementById('night-number'),
-            voteWarning: document.getElementById('vote-warning')
+            voteWarning: document.getElementById('vote-warning'),
+            dayActionBtn: document.getElementById('day-action-btn')
         };
 
         function saveGame() {
@@ -987,13 +1003,30 @@
                 elements.nightResultCard.style.display = 'none';
                 refreshDaySelect();
                 
-                // Показываем предупреждение о голосовании
-                if (game.nightCount === 1 && !game.firstNightDone) {
-                    elements.voteWarning.innerHTML = '⚠️ ПЕРВЫЙ ДЕНЬ — ТОЛЬКО ОБСУЖДЕНИЕ! Голосование начнётся со 2-го дня. ⚠️';
-                    document.getElementById('confirm-vote-btn').disabled = true;
+                // Настройка UI для дня в зависимости от номера ночи
+                const isFirstDay = game.nightCount === 2 && game.firstNightDone;
+                
+                if (isFirstDay) {
+                    // Первый день — только обсуждение
+                    elements.voteWarning.innerHTML = '🗣️ ПЕРВЫЙ ДЕНЬ — ТОЛЬКО ОБСУЖДЕНИЕ!\nОбсудите события и стратегию.';
+                    elements.voteWarning.style.borderLeftColor = '#6c5ce7';
+                    elements.voteTarget.disabled = true;
+                    elements.dayActionBtn.textContent = '💬 Обсудили — пора спать';
+                    elements.dayActionBtn.className = 'secondary';
+                    elements.dayActionBtn.onclick = () => {
+                        if (confirm('Перейти в ночь? Обсуждение закончено.')) {
+                            addLogMessage('💬 День закончился обсуждением. Переход в ночь.');
+                            setPhase('night');
+                        }
+                    };
                 } else {
-                    elements.voteWarning.innerHTML = '🗳️ Идёт голосование. Выберите игрока для исключения.';
-                    document.getElementById('confirm-vote-btn').disabled = false;
+                    // Со второго дня — голосование
+                    elements.voteWarning.innerHTML = '🗳️ ИДЁТ ГОЛОСОВАНИЕ!\nВыберите игрока для исключения из города.';
+                    elements.voteWarning.style.borderLeftColor = '#f59e0b';
+                    elements.voteTarget.disabled = false;
+                    elements.dayActionBtn.textContent = '🗳️ Исключить игрока';
+                    elements.dayActionBtn.className = 'primary';
+                    elements.dayActionBtn.onclick = confirmVote;
                 }
             }
         }
@@ -1007,7 +1040,6 @@
             const alivePlayers = getActivePlayers();
             const isFirstNight = !game.firstNightDone;
             
-            // 1-я ночь — все действия заблокированы
             if (isFirstNight) {
                 elements.mafiaTarget.disabled = true;
                 elements.doctorTarget.disabled = true;
@@ -1021,7 +1053,6 @@
                 return;
             }
             
-            // Со 2-й ночи — всё работает
             if (isMafiaAlive()) {
                 elements.mafiaTarget.disabled = false;
                 elements.mafiaDisabled.style.display = 'none';
@@ -1125,20 +1156,18 @@
         function resolveNight() {
             if (game.currentPhase !== 'night') return;
             
-            // 1-я ночь — знакомство
             if (!game.firstNightDone) {
                 game.firstNightDone = true;
                 game.nightCount = 2;
                 addLogMessage('🌙 Первая ночь прошла. Все познакомились со своими ролями.');
                 showNightModal('🌙 Знакомство с ролями', 
-                    'Первая ночь завершена!\n\nВсе игроки узнали свои роли.\n\n☀️ Наступает день для обсуждения.\n\n🗳️ Голосование начнётся со следующего дня.', 
+                    'Первая ночь завершена!\n\nВсе игроки узнали свои роли.\n\n☀️ Наступает день для обсуждения.\n\n🗣️ Голосование начнётся со следующего дня.', 
                     'intro');
                 window.pendingPhaseSwitch = true;
                 saveGame();
                 return;
             }
             
-            // Со 2-й ночи — реальные действия
             let killedId = game.nightActions.mafiaKill;
             let savedId = game.nightActions.doctorSave;
             let resultText = '';
@@ -1187,12 +1216,6 @@
         }
 
         function confirmVote() {
-            // Запрещаем голосование в первый день
-            if (game.nightCount === 2 && game.currentPhase === 'day') {
-                alert('⚠️ Первый день — только обсуждение! Голосование начнётся со следующего дня.');
-                return;
-            }
-            
             const targetId = elements.voteTarget.value;
             if (!targetId) {
                 alert('Выберите игрока');
@@ -1208,13 +1231,6 @@
                 renderPlayersList();
                 updateStats();
                 if (checkWinCondition()) return;
-                setPhase('night');
-            }
-        }
-
-        function skipDay() {
-            if (confirm('Пропустить день и перейти в ночь?')) {
-                addLogMessage(`⏭️ День пропущен. Переход в ночь.`);
                 setPhase('night');
             }
         }
@@ -1300,12 +1316,16 @@
             
             document.getElementById('night-btn').onclick = () => setPhase('night');
             document.getElementById('day-btn').onclick = () => setPhase('day');
-            document.getElementById('skip-vote-btn').onclick = skipDay;
+            document.getElementById('skip-vote-btn').onclick = () => {
+                if (confirm('Пропустить день и перейти в ночь?')) {
+                    addLogMessage(`⏭️ День пропущен. Переход в ночь.`);
+                    setPhase('night');
+                }
+            };
             document.getElementById('mafia-target').onchange = (e) => setMafiaKill(e.target.value);
             document.getElementById('doctor-target').onchange = (e) => setDoctorSave(e.target.value);
             document.getElementById('commissioner-target').onchange = (e) => setCommissionerCheck(e.target.value);
             document.getElementById('end-night-btn').onclick = resolveNight;
-            document.getElementById('confirm-vote-btn').onclick = confirmVote;
             
             updatePhaseUI();
         }

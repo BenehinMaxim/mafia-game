@@ -137,58 +137,6 @@
             flex: 1;
         }
 
-        .reset-button-wrapper {
-            position: relative;
-        }
-        
-        .reset-trigger {
-            background: rgba(100, 116, 139, 0.5);
-            padding: 12px 16px;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            color: #94a3b8;
-        }
-        
-        .reset-trigger:hover {
-            background: rgba(100, 116, 139, 0.8);
-            color: white;
-        }
-        
-        .reset-confirm {
-            position: absolute;
-            right: 0;
-            top: 100%;
-            margin-top: 8px;
-            background: #1e293b;
-            border-radius: 12px;
-            padding: 12px;
-            min-width: 200px;
-            z-index: 100;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.2);
-            display: none;
-        }
-        
-        .reset-confirm.show {
-            display: block;
-        }
-        
-        .reset-confirm p {
-            font-size: 12px;
-            margin-bottom: 10px;
-            color: #fbbf24;
-        }
-        
-        .reset-confirm-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
         .players-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -575,16 +523,7 @@
                     <button id="add-player-btn" class="primary">➕ Добавить</button>
                     <button id="random-roles-btn" class="warning">🎲 Случайные роли</button>
                     <button id="new-game-btn" class="secondary">🎮 Новая игра</button>
-                </div>
-                <div class="reset-button-wrapper">
-                    <div class="reset-trigger" id="reset-trigger">🔧 Сброс</div>
-                    <div class="reset-confirm" id="reset-confirm">
-                        <p>⚠️ Удалить ВСЕХ игроков и начать заново?</p>
-                        <div class="reset-confirm-buttons">
-                            <button id="reset-confirm-yes" class="danger">Да, сбросить</button>
-                            <button id="reset-confirm-no" class="outline">Отмена</button>
-                        </div>
-                    </div>
+                    <button id="reset-btn" class="danger" style="background: #64748b;">🔧 Сброс всех игроков</button>
                 </div>
             </div>
         </div>
@@ -794,22 +733,28 @@
         }
 
         function fullReset() {
-            game = {
-                players: [],
-                currentPhase: 'night',
-                nightCount: 1,
-                logMessages: [],
-                nightActions: { mafiaKill: null, doctorSave: null, commissionerCheck: null },
-                gameActive: true,
-                firstNightDone: false
-            };
-            renderPlayersList();
-            renderLog();
-            updateStats();
-            updatePhaseUI();
-            addLogMessage('🔄 Полный сброс. Все игроки удалены.');
-            saveGame();
-            document.getElementById('reset-confirm').classList.remove('show');
+            if (game.players.length === 0) {
+                alert('Нет игроков для сброса');
+                return;
+            }
+            
+            if (confirm('⚠️ Удалить ВСЕХ игроков и начать заново?\n\nВсе данные игры будут потеряны.')) {
+                game = {
+                    players: [],
+                    currentPhase: 'night',
+                    nightCount: 1,
+                    logMessages: [],
+                    nightActions: { mafiaKill: null, doctorSave: null, commissionerCheck: null },
+                    gameActive: true,
+                    firstNightDone: false
+                };
+                renderPlayersList();
+                renderLog();
+                updateStats();
+                updatePhaseUI();
+                addLogMessage('🔄 Полный сброс. Все игроки удалены.');
+                saveGame();
+            }
         }
 
         function addLogMessage(message) {
@@ -1003,11 +948,9 @@
                 elements.nightResultCard.style.display = 'none';
                 refreshDaySelect();
                 
-                // Настройка UI для дня в зависимости от номера ночи
                 const isFirstDay = game.nightCount === 2 && game.firstNightDone;
                 
                 if (isFirstDay) {
-                    // Первый день — только обсуждение
                     elements.voteWarning.innerHTML = '🗣️ ПЕРВЫЙ ДЕНЬ — ТОЛЬКО ОБСУЖДЕНИЕ!\nОбсудите события и стратегию.';
                     elements.voteWarning.style.borderLeftColor = '#6c5ce7';
                     elements.voteTarget.disabled = true;
@@ -1020,7 +963,6 @@
                         }
                     };
                 } else {
-                    // Со второго дня — голосование
                     elements.voteWarning.innerHTML = '🗳️ ИДЁТ ГОЛОСОВАНИЕ!\nВыберите игрока для исключения из города.';
                     elements.voteWarning.style.borderLeftColor = '#f59e0b';
                     elements.voteTarget.disabled = false;
@@ -1304,15 +1246,7 @@
             };
             document.getElementById('random-roles-btn').onclick = assignRandomRoles;
             document.getElementById('new-game-btn').onclick = newGame;
-            
-            const resetTrigger = document.getElementById('reset-trigger');
-            const resetConfirm = document.getElementById('reset-confirm');
-            resetTrigger.onclick = (e) => { e.stopPropagation(); resetConfirm.classList.toggle('show'); };
-            document.getElementById('reset-confirm-yes').onclick = fullReset;
-            document.getElementById('reset-confirm-no').onclick = () => resetConfirm.classList.remove('show');
-            document.addEventListener('click', (e) => {
-                if (!resetTrigger.contains(e.target) && !resetConfirm.contains(e.target)) resetConfirm.classList.remove('show');
-            });
+            document.getElementById('reset-btn').onclick = fullReset;
             
             document.getElementById('night-btn').onclick = () => setPhase('night');
             document.getElementById('day-btn').onclick = () => setPhase('day');

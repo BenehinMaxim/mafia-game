@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mafia-game-v1';
+const CACHE_NAME = 'mafia-game-v2'; // Меняем версию для принудительного обновления
 const urlsToCache = [
   '/',
   '/index.html',
@@ -12,15 +12,19 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(urlsToCache))
   );
+  // Сразу активируем новый Service Worker
+  self.skipWaiting();
 });
 
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
+        // Возвращаем из кэша, если есть
         if (response) {
           return response;
         }
+        // Иначе идём в сеть
         return fetch(event.request);
       })
   );
@@ -28,14 +32,19 @@ self.addEventListener('fetch', event => {
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    Promise.all([
+      // Удаляем старые кэши
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(cacheName => {
+            if (cacheName !== CACHE_NAME) {
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // Принудительно захватываем контроль над страницей
+      self.clients.claim()
+    ])
   );
 });

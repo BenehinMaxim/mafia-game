@@ -107,6 +107,16 @@
             transform: translateY(-2px);
         }
 
+        #random-roles-btn {
+            background: #f59e0b;
+            color: white;
+        }
+
+        #random-roles-btn:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+
         .reset-btn {
             background-color: #dc2626 !important;
             color: white !important;
@@ -412,6 +422,7 @@
         <div class="control-panel">
             <input type="text" id="player-name-input" placeholder="Введите имя игрока">
             <button id="add-player-btn">➕ Добавить игрока</button>
+            <button id="random-roles-btn">🎲 Случайные роли</button>
             <button id="toggle-phase-btn">🌙/☀️ Сменить фазу</button>
         </div>
 
@@ -551,14 +562,14 @@
             players.push({
                 id: Date.now(),
                 name: name.trim(),
-                role: null,
+                role: 'civilian',  // Автоматически назначаем роль "Мирный"
                 isAlive: true,
                 isLeft: false,
                 voteTarget: null
             });
             
             renderPlayersList();
-            addLogMessage(`👤 Добавлен игрок: ${name}`);
+            addLogMessage(`👤 Добавлен игрок: ${name} (👨🌾 Мирный)`);
             saveGameState();
         }
 
@@ -609,6 +620,82 @@
                 addLogMessage(`✨ Игрок ${player.name} воскрешён`);
             }
             renderPlayersList();
+            saveGameState();
+        }
+
+        // ==================== СЛУЧАЙНОЕ РАСПРЕДЕЛЕНИЕ РОЛЕЙ ====================
+        function assignRandomRoles() {
+            const alivePlayers = players.filter(p => p.isAlive);
+            
+            if (alivePlayers.length === 0) {
+                alert('Нет живых игроков для распределения ролей');
+                return;
+            }
+            
+            if (alivePlayers.length < 4) {
+                alert('Для игры нужно минимум 4 игрока. Сейчас ' + alivePlayers.length);
+                return;
+            }
+            
+            // Определяем количество ролей в зависимости от количества игроков
+            let mafiaCount = 1;
+            let commissionerCount = 1;
+            let doctorCount = 1;
+            
+            if (alivePlayers.length >= 7) {
+                mafiaCount = 2;
+            }
+            if (alivePlayers.length >= 10) {
+                mafiaCount = 3;
+            }
+            
+            // Создаём массив ролей
+            let roles = [];
+            
+            // Добавляем мафию
+            for (let i = 0; i < mafiaCount; i++) {
+                roles.push('mafia');
+            }
+            
+            // Добавляем комиссара
+            for (let i = 0; i < commissionerCount; i++) {
+                roles.push('commissioner');
+            }
+            
+            // Добавляем доктора
+            for (let i = 0; i < doctorCount; i++) {
+                roles.push('doctor');
+            }
+            
+            // Остальные - мирные
+            const civilianCount = alivePlayers.length - roles.length;
+            for (let i = 0; i < civilianCount; i++) {
+                roles.push('civilian');
+            }
+            
+            // Перемешиваем роли
+            for (let i = roles.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [roles[i], roles[j]] = [roles[j], roles[i]];
+            }
+            
+            // Назначаем роли игрокам
+            alivePlayers.forEach((player, index) => {
+                player.role = roles[index];
+            });
+            
+            // Обновляем отображение
+            renderPlayersList();
+            
+            // Логируем распределение
+            addLogMessage(`🎲 Случайное распределение ролей (${alivePlayers.length} игроков):`);
+            addLogMessage(`   🔪 Мафия: ${mafiaCount} чел.`);
+            addLogMessage(`   🔍 Комиссар: ${commissionerCount} чел.`);
+            addLogMessage(`   💊 Доктор: ${doctorCount} чел.`);
+            addLogMessage(`   👨🌾 Мирные: ${civilianCount} чел.`);
+            
+            alert(`Роли распределены!\n\n🔪 Мафия: ${mafiaCount} чел.\n🔍 Комиссар: 1 чел.\n💊 Доктор: 1 чел.\n👨🌾 Мирные: ${civilianCount} чел.`);
+            
             saveGameState();
         }
 
@@ -824,6 +911,14 @@
                 };
             }
             
+            // Кнопка случайных ролей
+            const randomRolesBtn = document.getElementById('random-roles-btn');
+            if (randomRolesBtn) {
+                randomRolesBtn.onclick = () => {
+                    assignRandomRoles();
+                };
+            }
+            
             // Кнопка смены фазы
             const togglePhaseBtn = document.getElementById('toggle-phase-btn');
             if (togglePhaseBtn) {
@@ -849,6 +944,7 @@
         window.setDoctorSave = setDoctorSave;
         window.resolveNight = resolveNight;
         window.resetGame = resetGame;
+        window.assignRandomRoles = assignRandomRoles;
 
         // Запускаем при загрузке страницы
         document.addEventListener('DOMContentLoaded', init);

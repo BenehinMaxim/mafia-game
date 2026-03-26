@@ -145,7 +145,7 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
-            flex: 1;
+            flex: 2;
         }
 
         .main-buttons button {
@@ -583,6 +583,7 @@
                 <input type="text" id="player-name-input" placeholder="Введите имя игрока">
                 <div class="main-buttons">
                     <button id="add-player-btn" class="primary">➕ Добавить</button>
+                    <button id="random-roles-btn" class="warning">🎲 Случайные роли</button>
                     <button id="new-game-btn" class="secondary">🎮 Новая игра</button>
                 </div>
                 <div class="reset-button-wrapper">
@@ -667,7 +668,8 @@
         
         <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 12px; font-size: 11px; text-align: center; color: #ccc;">
             💡 Подсказка: Нажмите на карточку игрока, чтобы увидеть его роль<br>
-            🎮 "Новая игра" — сброс прогресса, но игроки остаются | 🔧 "Сброс" — удаляет всех игроков
+            🎲 "Случайные роли" — автоматически распределяет роли<br>
+            🎮 "Новая игра" — сброс прогресса, игроки остаются | 🔧 "Сброс" — удаляет всех игроков
         </div>
     </div>
 

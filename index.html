@@ -166,7 +166,6 @@
         .phase-indicator.night { background: rgba(156,39,176,0.2); }
         .phase-indicator.day { background: rgba(255,193,7,0.2); }
         
-        /* Таймер */
         .timer-container {
             background: rgba(0,0,0,0.5);
             border-radius: 12px;
@@ -313,23 +312,10 @@
             text-align: center;
         }
         
-        /* Стили для модалки победы */
-        .victory-modal .modal-content {
-            text-align: center;
-        }
-        .victory-icon {
-            font-size: 4rem;
-            margin-bottom: 16px;
-        }
-        .victory-message {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        .victory-submessage {
-            color: #888;
-            margin-bottom: 24px;
-        }
+        .victory-modal .modal-content { text-align: center; }
+        .victory-icon { font-size: 4rem; margin-bottom: 16px; }
+        .victory-message { font-size: 1.5rem; font-weight: bold; margin-bottom: 8px; }
+        .victory-submessage { color: #888; margin-bottom: 24px; }
         .mode-selector-small {
             display: flex;
             gap: 8px;
@@ -345,19 +331,9 @@
             transition: all 0.2s;
             font-size: 0.85rem;
         }
-        .mode-chip.selected {
-            background: #4CAF50;
-            color: white;
-        }
-        .player-option {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin: 16px 0;
-        }
-        .player-option .btn {
-            flex: 1;
-        }
+        .mode-chip.selected { background: #4CAF50; color: white; }
+        .player-option { display: flex; gap: 12px; justify-content: center; margin: 16px 0; }
+        .player-option .btn { flex: 1; }
     </style>
 </head>
 <body>
@@ -476,7 +452,6 @@
         <div id="gamePhase" class="hidden">
             <div id="phaseIndicator" class="phase-indicator night">🌙 Ночь <span id="roundNumber">0</span></div>
             
-            <!-- Таймер обсуждения -->
             <div id="timerCard" class="timer-container hidden">
                 <div class="timer-display" id="timerDisplay">01:00</div>
                 <div class="timer-controls">
@@ -607,11 +582,9 @@
                 submessage.textContent = 'Правосудие восторжествовало, мафия уничтожена.';
             }
             
-            // Показываем информацию о текущих игроках
             const aliveCount = players.filter(p => p.isAlive).length;
             playersInfo.textContent = `В игре участвовало ${players.length} человек. ${aliveCount} дожили до финала.`;
             
-            // Настройка выбора режима для новой игры
             document.querySelectorAll('#newGameModeSelector .mode-chip').forEach(chip => {
                 chip.classList.remove('selected');
                 if (chip.dataset.mode === gameMode) chip.classList.add('selected');
@@ -634,14 +607,12 @@
         function startNewGameWithSamePlayers() {
             const newMode = pendingNewGameMode || gameMode;
             
-            // Сбрасываем состояние игроков (очищаем роли, воскрешаем)
             players.forEach(p => {
                 p.role = null;
                 p.isAlive = true;
                 p.isEliminated = false;
             });
             
-            // Проверяем лимит игроков для нового режима
             const config = roleConfig[newMode];
             if (players.length > config.maxPlayers) {
                 showToast(`⚠️ Для режима ${newMode === 'auto_classic' || newMode === 'card_classic' ? 'Спортивная' : 'Ролевая'} максимум ${config.maxPlayers} игроков. Удалите лишних.`, 'error');
@@ -659,10 +630,8 @@
             gamePhase = 'night';
             gameInProgress = true;
             
-            // Обновляем выбранный режим в интерфейсе
             selectMode(gameMode);
             
-            // Распределяем роли или показываем окно назначения
             if (gameMode === 'auto_role' || gameMode === 'auto_classic') {
                 autoAssignRoles();
                 startGameAfterRoles();
@@ -677,7 +646,6 @@
             const newMode = pendingNewGameMode || gameMode;
             document.getElementById('victoryModal').classList.remove('active');
             
-            // Полный сброс — очищаем игроков
             players = [];
             gameMode = newMode;
             gamePhase = 'setup';
@@ -686,7 +654,6 @@
             
             localStorage.removeItem('mafiaGameState');
             
-            // Обновляем интерфейс
             selectMode(gameMode);
             renderPlayersList();
             updateMaxPlayers();

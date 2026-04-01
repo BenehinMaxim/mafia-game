@@ -47,25 +47,9 @@
             margin-bottom: 20px;
         }
         
-        header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-        }
-        
-        header .subtitle {
-            color: #888;
-            font-size: 0.9rem;
-        }
-        
-        .save-indicator {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            color: #4CAF50;
-            font-size: 0.85rem;
-            margin-top: 8px;
-        }
+        header h1 { font-size: 1.8rem; margin-bottom: 8px; }
+        header .subtitle { color: #888; font-size: 0.9rem; }
+        .save-indicator { display: flex; align-items: center; justify-content: center; gap: 6px; color: #4CAF50; font-size: 0.85rem; margin-top: 8px; }
         
         .card {
             background: rgba(255,255,255,0.08);
@@ -76,13 +60,7 @@
             -webkit-backdrop-filter: blur(10px);
         }
         
-        .card-title {
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .card-title { font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
         
         .mode-selector {
             display: grid;
@@ -101,34 +79,12 @@
             border: 2px solid transparent;
         }
         
-        .mode-card.selected {
-            border-color: #4CAF50;
-            background: rgba(76, 175, 80, 0.2);
-        }
+        .mode-card.selected { border-color: #4CAF50; background: rgba(76, 175, 80, 0.2); }
+        .mode-card .mode-emoji { font-size: 2rem; display: block; margin-bottom: 8px; }
+        .mode-card .mode-name { font-weight: bold; font-size: 0.9rem; }
+        .mode-card .mode-desc { font-size: 0.7rem; color: #888; margin-top: 4px; }
         
-        .mode-card .mode-emoji {
-            font-size: 2rem;
-            display: block;
-            margin-bottom: 8px;
-        }
-        
-        .mode-card .mode-name {
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-        
-        .mode-card .mode-desc {
-            font-size: 0.7rem;
-            color: #888;
-            margin-top: 4px;
-        }
-        
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-        
+        .input-group { display: flex; gap: 10px; margin-bottom: 12px; }
         .input-group input {
             flex: 1;
             padding: 12px 16px;
@@ -140,11 +96,7 @@
             -webkit-user-select: text;
             user-select: text;
         }
-        
-        .input-group input:focus {
-            outline: none;
-            border-color: #4CAF50;
-        }
+        .input-group input:focus { outline: none; border-color: #4CAF50; }
         
         .btn {
             padding: 12px 20px;
@@ -160,17 +112,8 @@
             transition: transform 0.1s, opacity 0.2s;
             -webkit-tap-highlight-color: transparent;
         }
-        
-        .btn:active {
-            transform: scale(0.96);
-            opacity: 0.9;
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
+        .btn:active { transform: scale(0.96); opacity: 0.9; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-primary { background: #4CAF50; color: white; }
         .btn-secondary { background: rgba(255,255,255,0.15); color: white; }
         .btn-success { background: #2196F3; color: white; }
@@ -178,12 +121,7 @@
         .btn-warning { background: #ff9800; color: white; }
         .btn-block { width: 100%; }
         
-        .btn-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
         
         .players-list {
             max-height: 300px;
@@ -204,17 +142,8 @@
             gap: 8px;
         }
         
-        .player-name {
-            font-weight: 500;
-            word-break: break-word;
-        }
-        
-        .player-role {
-            font-size: 0.85rem;
-            color: #888;
-            margin-left: 8px;
-        }
-        
+        .player-name { font-weight: 500; word-break: break-word; }
+        .player-role { font-size: 0.85rem; color: #888; margin-left: 8px; }
         .player-role.revealed { color: #4CAF50; }
         .player-role-select {
             padding: 4px 8px;
@@ -224,22 +153,8 @@
             border: 1px solid rgba(255,255,255,0.3);
             font-size: 0.8rem;
         }
-        
-        .player-actions {
-            display: flex;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-        
-        .player-actions button {
-            padding: 6px 10px;
-            font-size: 0.8rem;
-            border-radius: 6px;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
+        .player-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .player-actions button { padding: 6px 10px; font-size: 0.8rem; border-radius: 6px; background: rgba(255,255,255,0.1); color: white; border: none; cursor: pointer; }
         
         .phase-indicator {
             text-align: center;
@@ -250,6 +165,36 @@
         }
         .phase-indicator.night { background: rgba(156,39,176,0.2); }
         .phase-indicator.day { background: rgba(255,193,7,0.2); }
+        
+        /* Таймер */
+        .timer-container {
+            background: rgba(0,0,0,0.5);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .timer-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            font-family: monospace;
+            letter-spacing: 4px;
+        }
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .timer-controls .btn { padding: 6px 12px; font-size: 0.8rem; }
+        .timer-running { color: #4CAF50; }
+        .timer-warning { color: #ff9800; }
+        .timer-danger { color: #f44336; animation: pulse 0.5s infinite; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
         
         .night-actions { display: grid; gap: 12px; }
         .night-action-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; }
@@ -273,11 +218,7 @@
             padding-right: 44px;
         }
         
-        .role-assign-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
+        .role-assign-list { max-height: 400px; overflow-y: auto; }
         .role-assign-item {
             display: flex;
             align-items: center;
@@ -299,7 +240,6 @@
             font-size: 0.9rem;
             -webkit-overflow-scrolling: touch;
         }
-        
         .log-entry { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .log-entry.night { color: #ce93d8; }
         .log-entry.day { color: #fff59d; }
@@ -318,9 +258,7 @@
             justify-content: center;
             padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
         }
-        
         .modal.active { display: flex; }
-        
         .modal-content {
             background: #1a1a2e;
             border-radius: 16px;
@@ -330,7 +268,6 @@
             max-height: 90vh;
             overflow-y: auto;
         }
-        
         .modal-title { font-size: 1.3rem; margin-bottom: 16px; text-align: center; }
         .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
         .modal-actions .btn { flex: 1; }
@@ -437,15 +374,15 @@
             <div class="card">
                 <div class="card-title">💡 Правила</div>
                 <ul class="rules-list" id="rulesList">
-                    <li>🌙 <strong>1-я ночь</strong> — знакомство с ролями</li>
+                    <li>🌙 <strong>Ночь 0</strong> — знакомство с ролями</li>
                     <li>☀️ <strong>1-й день</strong> — только обсуждение</li>
-                    <li>🌙 <strong>Со 2-й ночи</strong> — активные действия</li>
+                    <li>🌙 <strong>Ночь 1</strong> — начало активных действий</li>
                     <li>🗳️ <strong>Со 2-го дня</strong> — голосование</li>
                 </ul>
             </div>
         </div>
         
-        <!-- Role Assignment Modal (для карточных режимов) -->
+        <!-- Role Assignment Modal -->
         <div id="roleAssignmentModal" class="modal">
             <div class="modal-content">
                 <div class="modal-title">🎭 Назначение ролей</div>
@@ -459,7 +396,18 @@
         
         <!-- Game Phase -->
         <div id="gamePhase" class="hidden">
-            <div id="phaseIndicator" class="phase-indicator night">🌙 Ночь <span id="roundNumber">1</span></div>
+            <div id="phaseIndicator" class="phase-indicator night">🌙 Ночь <span id="roundNumber">0</span></div>
+            
+            <!-- Таймер обсуждения -->
+            <div id="timerCard" class="timer-container hidden">
+                <div class="timer-display" id="timerDisplay">01:00</div>
+                <div class="timer-controls">
+                    <button class="btn btn-secondary" onclick="startTimer()">▶️ Старт</button>
+                    <button class="btn btn-secondary" onclick="pauseTimer()">⏸️ Пауза</button>
+                    <button class="btn btn-secondary" onclick="resetTimer()">🔄 Сброс</button>
+                    <button class="btn btn-primary" onclick="addTimerLog()">📝 Отметить</button>
+                </div>
+            </div>
             
             <div id="nightPhase" class="card">
                 <div class="card-title">🌙 Ночные действия</div>
@@ -515,13 +463,18 @@
     <script>
         // ===== STATE =====
         let players = [];
-        let gameMode = 'auto_role'; // auto_role, card_role, auto_classic, card_classic
+        let gameMode = 'auto_role';
         let gamePhase = 'setup';
-        let round = 1;
+        let round = 0;  // Ночь 0 - ознакомительная, Ночь 1 - первая с действиями
         let gameInProgress = false;
         let pendingRoleAssignment = false;
         
-        // Роли для разных режимов
+        // Таймер
+        let timerInterval = null;
+        let timerSeconds = 60;
+        let timerRunning = false;
+        
+        // Роли
         const roleConfig = {
             auto_role: { roles: ['mafia', 'doctor', 'commissioner', 'civilian'], maxPlayers: 20, minPlayers: 4 },
             card_role: { roles: ['mafia', 'doctor', 'commissioner', 'civilian'], maxPlayers: 20, minPlayers: 4 },
@@ -542,14 +495,74 @@
             { name: 'Дон Котлето', emoji: '🍖' }, { name: 'Крёстный Пельмень', emoji: '🥟' },
             { name: 'Семья Семечек', emoji: '🌻' }, { name: 'Мафиоззо', emoji: '🎩' },
             { name: 'Босс Борода', emoji: '🧔' }, { name: 'Капо Картошка', emoji: '🥔' },
-            { name: 'Консильери Колбаса', emoji: '🌭' }, { name: 'Омерта Оливье', emoji: '🥗' },
-            { name: 'Честный Вор', emoji: '🎭' }, { name: 'Налоговый Инспектор', emoji: '📊' },
             { name: 'Тихий Смерть', emoji: '🤫' }, { name: 'Нож В Спине', emoji: '🔪' },
-            { name: 'Бетонные Тапки', emoji: '👟' }, { name: 'Чёрная Метка', emoji: '⚫' },
-            { name: 'Тёмная Лошадка', emoji: '🐴' }, { name: 'Тень Отца', emoji: '👤' },
-            { name: 'Волк С Уолл-стрит', emoji: '🐺' }, { name: 'Кот Бегемот', emoji: '🐱' },
             { name: 'Ёжик В Тумане', emoji: '🦔' }, { name: 'Мистер Икс', emoji: '❌' }
         ];
+        
+        // ===== TIMER FUNCTIONS =====
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const secs = timerSeconds % 60;
+            const display = document.getElementById('timerDisplay');
+            display.textContent = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            display.classList.remove('timer-running', 'timer-warning', 'timer-danger');
+            if (timerSeconds <= 10) display.classList.add('timer-danger');
+            else if (timerSeconds <= 30) display.classList.add('timer-warning');
+            else if (timerRunning) display.classList.add('timer-running');
+        }
+        
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerRunning = true;
+            timerInterval = setInterval(() => {
+                if (timerRunning && timerSeconds > 0) {
+                    timerSeconds--;
+                    updateTimerDisplay();
+                    if (timerSeconds === 0) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        timerRunning = false;
+                        showToast('⏰ Время обсуждения вышло!', 'warning');
+                        addLog('⏰ Таймер обсуждения завершён', 'day');
+                        updateTimerDisplay();
+                    }
+                }
+            }, 1000);
+            updateTimerDisplay();
+            addLog('⏱️ Таймер обсуждения запущен (1 минута)', 'day');
+        }
+        
+        function pauseTimer() {
+            timerRunning = false;
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            updateTimerDisplay();
+            addLog('⏸️ Таймер обсуждения на паузе', 'day');
+        }
+        
+        function resetTimer() {
+            pauseTimer();
+            timerSeconds = 60;
+            timerRunning = false;
+            updateTimerDisplay();
+            addLog('🔄 Таймер сброшен на 1 минуту', 'day');
+        }
+        
+        function addTimerLog() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const secs = timerSeconds % 60;
+            addLog(`📝 Отметка времени: ${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`, 'day');
+            showToast('Отметка добавлена в лог', 'info');
+        }
+        
+        function showTimerCard(show) {
+            const timerCard = document.getElementById('timerCard');
+            if (show) timerCard.classList.remove('hidden');
+            else timerCard.classList.add('hidden');
+        }
         
         // ===== UTILITIES =====
         function showToast(message, type = 'success') {
@@ -572,7 +585,6 @@
         }
         
         function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
-        
         function escapeHtml(text) { return text.replace(/[&<>]/g, function(m) { return {'&':'&amp;','<':'&lt;','>':'&gt;'}[m]; }); }
         
         function updateMaxPlayers() {
@@ -580,23 +592,22 @@
             document.getElementById('maxPlayers').textContent = config.maxPlayers;
             document.getElementById('playerCount').textContent = players.length;
             
-            // Обновляем правила
             const rulesList = document.getElementById('rulesList');
             if (gameMode.includes('classic')) {
                 rulesList.innerHTML = `
-                    <li>👑 <strong>Дон</strong> — узнаёт шерифа при проверке, но не убивает</li>
-                    <li>⭐ <strong>Шериф</strong> — проверяет игроков, видит мафию/дона</li>
-                    <li>🔪 <strong>Мафия</strong> — убивает каждую ночь</li>
-                    <li>🌙 <strong>1-я ночь</strong> — знакомство с ролями</li>
+                    <li>👑 <strong>Дон</strong> — узнаёт шерифа при проверке</li>
+                    <li>⭐ <strong>Шериф</strong> — проверяет игроков</li>
+                    <li>🌙 <strong>Ночь 0</strong> — знакомство с ролями</li>
+                    <li>☀️ <strong>1-й день</strong> — обсуждение (таймер 1 мин)</li>
+                    <li>🌙 <strong>Ночь 1</strong> — мафия убивает, шериф проверяет</li>
                     <li>🗳️ <strong>Со 2-го дня</strong> — голосование</li>
-                    <li>🏆 <strong>Игра до 10 человек</strong></li>
                 `;
             } else {
                 rulesList.innerHTML = `
-                    <li>🌙 <strong>1-я ночь</strong> — знакомство с ролями, без убийств</li>
-                    <li>☀️ <strong>1-й день</strong> — только обсуждение</li>
-                    <li>🌙 <strong>Со 2-й ночи</strong> — мафия убивает, доктор лечит, комиссар проверяет</li>
-                    <li>🗳️ <strong>Со 2-го дня</strong> — начинается голосование</li>
+                    <li>🌙 <strong>Ночь 0</strong> — знакомство с ролями</li>
+                    <li>☀️ <strong>1-й день</strong> — обсуждение (таймер 1 мин)</li>
+                    <li>🌙 <strong>Ночь 1</strong> — мафия убивает, доктор лечит, комиссар проверяет</li>
+                    <li>🗳️ <strong>Со 2-го дня</strong> — голосование</li>
                 `;
             }
         }
@@ -692,20 +703,17 @@
         
         // ===== ROLE ASSIGNMENT =====
         function getAvailableRolesForMode() {
-            const config = roleConfig[gameMode];
             const playerCount = players.length;
             
             if (gameMode.includes('classic')) {
-                // Спортивная мафия: мафия 30-40%, дон, шериф
                 const mafiaCount = Math.max(1, Math.floor(playerCount * 0.35));
                 const roles = [];
                 for (let i = 0; i < mafiaCount - 1; i++) roles.push('mafia');
-                roles.push('don'); // дон вместо одного мафиози
+                roles.push('don');
                 if (playerCount >= 5) roles.push('sheriff');
                 while (roles.length < playerCount) roles.push('civilian');
                 return roles;
             } else {
-                // Ролевая мафия
                 const mafiaCount = Math.max(1, Math.floor(playerCount * 0.25));
                 const roles = [];
                 for (let i = 0; i < mafiaCount; i++) roles.push('mafia');
@@ -734,7 +742,6 @@
         function showRoleAssignmentModal() {
             const config = roleConfig[gameMode];
             const possibleRoles = config.roles.filter(r => r !== 'civilian');
-            const mafiaCount = gameMode.includes('classic') ? Math.max(1, Math.floor(players.length * 0.35)) : Math.max(1, Math.floor(players.length * 0.25));
             
             const list = document.getElementById('roleAssignList');
             list.innerHTML = players.map(player => `
@@ -789,7 +796,7 @@
             }
             
             players.forEach(p => { p.role = null; p.isAlive = true; p.isEliminated = false; });
-            round = 1;
+            round = 0;  // Ночь 0 - ознакомительная
             gameInProgress = true;
             
             if (gameMode === 'auto_role' || gameMode === 'auto_classic') {
@@ -807,15 +814,16 @@
             document.getElementById('nightPhase').classList.remove('hidden');
             document.getElementById('dayPhase').classList.add('hidden');
             document.getElementById('eventLog').innerHTML = '';
+            showTimerCard(false);
             
             renderGamePlayersList();
             updateNightActionsUI();
             updatePhaseIndicator();
             
             addLog('🎮 Игра началась!', 'action');
-            addLog('🌙 Первая ночь — знакомство с ролями', 'night');
-            saveGame();
+            addLog('🌙 Ночь 0 — игроки знакомятся со своими ролями. Ночных действий НЕТ.', 'night');
             showToast('Игра началась! 🎭', 'success');
+            saveGame();
         }
         
         function renderGamePlayersList() {
@@ -848,30 +856,37 @@
             const hasSheriff = players.some(p => p.role === 'sheriff' && p.isAlive);
             
             let html = '';
-            if (hasMafia && round > 1) {
-                html += `<div class="night-action-item"><label>🔪 ${gameMode.includes('classic') ? 'Мафия и Дон убивают:' : 'Мафия убивает:'}</label>
-                         <select id="mafiaTarget">${options}</select></div>`;
-            }
-            if (hasDoctor && !gameMode.includes('classic')) {
-                html += `<div class="night-action-item"><label>💊 Доктор лечит:</label>
-                         <select id="doctorTarget">${options}</select></div>`;
-            }
-            if (hasCommissioner && !gameMode.includes('classic')) {
-                html += `<div class="night-action-item"><label>🔍 Комиссар проверяет:</label>
-                         <select id="commissionerTarget">${options}</select></div>`;
-            }
-            if (hasSheriff && gameMode.includes('classic')) {
-                html += `<div class="night-action-item"><label>⭐ Шериф проверяет:</label>
-                         <select id="sheriffTarget">${options}</select></div>`;
+            // Активные ночные действия только с НОЧИ 1 (round >= 1)
+            if (round >= 1) {
+                if (hasMafia) {
+                    html += `<div class="night-action-item"><label>🔪 ${gameMode.includes('classic') ? 'Мафия и Дон убивают:' : 'Мафия убивает:'}</label>
+                             <select id="mafiaTarget">${options}</select></div>`;
+                }
+                if (hasDoctor && !gameMode.includes('classic')) {
+                    html += `<div class="night-action-item"><label>💊 Доктор лечит:</label>
+                             <select id="doctorTarget">${options}</select></div>`;
+                }
+                if (hasCommissioner && !gameMode.includes('classic')) {
+                    html += `<div class="night-action-item"><label>🔍 Комиссар проверяет:</label>
+                             <select id="commissionerTarget">${options}</select></div>`;
+                }
+                if (hasSheriff && gameMode.includes('classic')) {
+                    html += `<div class="night-action-item"><label>⭐ Шериф проверяет:</label>
+                             <select id="sheriffTarget">${options}</select></div>`;
+                }
             }
             
-            if (html === '') html = '<div class="info-badge">🌙 Ночных действий нет (1-я ночь или все роли мертвы)</div>';
+            if (html === '') {
+                if (round === 0) html = '<div class="info-badge">🌙 НОЧЬ 0 — ознакомительная. Ночных действий нет. Нажмите "Завершить ночь", чтобы перейти к дню.</div>';
+                else html = '<div class="info-badge">🌙 Ночных действий нет (все роли мертвы)</div>';
+            }
             container.innerHTML = html;
         }
         
         function completeNight() {
-            if (round === 1) {
-                showNightResults(['🌙 Первая ночь завершена. Игроки познакомились со своими ролями.']);
+            if (round === 0) {
+                // Ночь 0 — просто переход к дню
+                showNightResults(['🌙 Ночь 0 завершена. Игроки познакомились со своими ролями. Переходим к 1-му дню обсуждения.']);
                 return;
             }
             
@@ -881,7 +896,6 @@
             const commissionerTarget = document.getElementById('commissionerTarget')?.value;
             const sheriffTarget = document.getElementById('sheriffTarget')?.value;
             
-            // Убийство мафии
             if (mafiaTarget) {
                 const target = players.find(p => p.id === mafiaTarget);
                 if (target && target.isAlive) {
@@ -896,8 +910,7 @@
                 }
             }
             
-            // Проверка комиссара (ролевая)
-            if (commissionerTarget) {
+            if (commissionerTarget && !gameMode.includes('classic')) {
                 const target = players.find(p => p.id === commissionerTarget);
                 if (target && target.isAlive) {
                     const isMafia = target.role === 'mafia';
@@ -906,8 +919,7 @@
                 }
             }
             
-            // Проверка шерифа (спортивная)
-            if (sheriffTarget) {
+            if (sheriffTarget && gameMode.includes('classic')) {
                 const target = players.find(p => p.id === sheriffTarget);
                 if (target && target.isAlive) {
                     const isMafia = target.role === 'mafia' || target.role === 'don';
@@ -928,19 +940,34 @@
         
         function closeNightResults() {
             document.getElementById('nightResultsModal').classList.remove('active');
+            
             gamePhase = 'day';
             document.getElementById('nightPhase').classList.add('hidden');
             document.getElementById('dayPhase').classList.remove('hidden');
             document.getElementById('votingSection').classList.add('hidden');
-            updatePhaseIndicator();
             
-            addLog(`☀️ Наступил день ${round}`, 'day');
+            // Показываем таймер на дневном обсуждении
+            if (round === 0) {
+                showTimerCard(true);
+                resetTimer();
+                addLog(`☀️ 1-й день (обсуждение). Таймер 1 минута.`, 'day');
+            } else {
+                showTimerCard(true);
+                resetTimer();
+                addLog(`☀️ День ${round + 1} (обсуждение). Таймер 1 минута.`, 'day');
+            }
+            
+            updatePhaseIndicator();
             renderGamePlayersList();
             checkWinCondition();
             saveGame();
         }
         
         function startVoting() {
+            // При начале голосования скрываем таймер
+            showTimerCard(false);
+            pauseTimer();
+            
             const alivePlayers = players.filter(p => p.isAlive);
             const options = '<option value="">Выберите игрока...</option>' + 
                 alivePlayers.map(p => `<option value="${p.id}">${p.emoji || '🎭'} ${escapeHtml(p.name)}</option>`).join('');
@@ -957,7 +984,7 @@
             if (target && target.isAlive) {
                 target.isEliminated = true;
                 target.isAlive = false;
-                addLog(`🗑️ ${target.emoji || '🎭'} ${escapeHtml(target.name)} исключён`, 'day');
+                addLog(`🗑️ ${target.emoji || '🎭'} ${escapeHtml(target.name)} исключён из игры`, 'day');
                 showToast(`${target.name} исключён`, 'info');
                 document.getElementById('votingSection').classList.add('hidden');
                 renderGamePlayersList();
@@ -968,6 +995,8 @@
         }
         
         function skipDay() {
+            showTimerCard(false);
+            pauseTimer();
             addLog('⏭️ День пропущен', 'day');
             endDay();
         }
@@ -978,6 +1007,8 @@
             document.getElementById('dayPhase').classList.add('hidden');
             document.getElementById('nightPhase').classList.remove('hidden');
             document.getElementById('votingSection').classList.add('hidden');
+            showTimerCard(false);
+            pauseTimer();
             updatePhaseIndicator();
             updateNightActionsUI();
             addLog(`🌙 Наступила ночь ${round}`, 'night');
@@ -991,9 +1022,11 @@
             if (gamePhase === 'night') {
                 indicator.className = 'phase-indicator night';
                 indicator.innerHTML = `🌙 Ночь <span id="roundNumber">${round}</span>`;
+                if (round === 0) indicator.innerHTML = `🌙 Ночь <span id="roundNumber">0</span> (ознакомительная)`;
             } else {
+                const dayNumber = round === 0 ? 1 : round + 1;
                 indicator.className = 'phase-indicator day';
-                indicator.innerHTML = `☀️ День <span id="roundNumber">${round}</span>`;
+                indicator.innerHTML = `☀️ День <span id="roundNumber">${dayNumber}</span>`;
             }
         }
         
@@ -1030,7 +1063,7 @@
                     players = state.players || [];
                     gameMode = state.gameMode || 'auto_role';
                     gamePhase = state.gamePhase || 'setup';
-                    round = state.round || 1;
+                    round = state.round !== undefined ? state.round : 0;
                     gameInProgress = state.gameInProgress || false;
                     
                     selectMode(gameMode);
@@ -1041,9 +1074,11 @@
                             document.getElementById('nightPhase').classList.remove('hidden');
                             document.getElementById('dayPhase').classList.add('hidden');
                             updateNightActionsUI();
+                            showTimerCard(false);
                         } else {
                             document.getElementById('nightPhase').classList.add('hidden');
                             document.getElementById('dayPhase').classList.remove('hidden');
+                            showTimerCard(true);
                         }
                         renderGamePlayersList();
                         updatePhaseIndicator();
@@ -1058,9 +1093,12 @@
         
         function handleResetGame() {
             if (!confirm('⚠️ Вы уверены? Все данные будут удалены.')) return;
+            if (timerInterval) clearInterval(timerInterval);
+            timerRunning = false;
+            timerInterval = null;
             players = [];
             gamePhase = 'setup';
-            round = 1;
+            round = 0;
             gameInProgress = false;
             localStorage.removeItem('mafiaGameState');
             document.getElementById('setupPhase').classList.remove('hidden');
@@ -1102,6 +1140,10 @@
         window.saveGame = saveGame;
         window.confirmRoleAssignment = confirmRoleAssignment;
         window.closeRoleAssignment = closeRoleAssignment;
+        window.startTimer = startTimer;
+        window.pauseTimer = pauseTimer;
+        window.resetTimer = resetTimer;
+        window.addTimerLog = addTimerLog;
     </script>
 </body>
 </html>

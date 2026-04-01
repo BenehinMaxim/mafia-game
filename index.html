@@ -478,8 +478,8 @@
                     <button class="btn btn-primary" onclick="handleAddPlayer()">Добавить</button>
                 </div>
                 <div class="btn-group">
-                    <button class="btn btn-secondary" onclick="addRandomPlayer()">🎲 Случайный ник</button>
-                    <button class="btn btn-warning" onclick="shuffleNicknames()">🔄 Перемешать ники</button>
+                    <button class="btn btn-secondary" onclick="addRandomPlayer()">🎲 Случайный псевдоним</button>
+                    <button class="btn btn-warning" onclick="shuffleNicknames()">🔄 Перемешать псевдонимы</button>
                     <button class="btn btn-danger" onclick="handleResetGame()">🔧 Сброс всех</button>
                 </div>
             </div>
@@ -764,7 +764,7 @@
             const availableNicknames = mafiaNicknames.filter(n => !usedNames.includes(n.name.toLowerCase()));
             
             if (availableNicknames.length === 0) {
-                showToast('🎭 Все ники заняты!', 'warning');
+                showToast('🎭 Все псевдонимы заняты!', 'warning');
                 return;
             }
             
@@ -795,7 +795,7 @@
             const availableNicknames = mafiaNicknames.filter(n => !usedNames.includes(n.name.toLowerCase()));
             
             if (availableNicknames.length < players.length) {
-                showToast('Недостаточно свободных ников', 'warning');
+                showToast('Недостаточно свободных псевдонимов', 'warning');
                 return;
             }
             
@@ -808,7 +808,7 @@
             
             renderPlayersList();
             saveGame();
-            showToast('🎭 Ники перемешаны!', 'success');
+            showToast('🎭 Псевдонимы перемешаны!', 'success');
         }
         
         function removePlayer(playerId) {

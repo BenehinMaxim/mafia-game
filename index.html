@@ -19,7 +19,6 @@
     <!-- Prevent accidental close -->
     <script>
         window.addEventListener('beforeunload', function (e) {
-            // Используем глобальные переменные из window (будем обновлять их в коде)
             if (window.gameInProgress && window.players && window.players.length > 0) {
                 e.preventDefault();
                 e.returnValue = '';
@@ -276,16 +275,37 @@
             color: #ccc;
         }
         
-        .night-action-item select {
+        /* FIX: Select dropdown styles for better readability */
+        .night-action-item select,
+        #votingTarget {
             width: 100%;
             padding: 10px;
             border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(255,255,255,0.1);
+            background: #1a1a2e;
             color: #fff;
             font-size: 1rem;
             -webkit-user-select: none;
             user-select: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+        
+        /* FIX: Option styles for dropdown */
+        .night-action-item select option,
+        #votingTarget option {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 10px;
+            font-size: 1rem;
+        }
+        
+        .night-action-item select:focus,
+        #votingTarget:focus {
+            outline: none;
+            border-color: #4CAF50;
         }
         
         .log-container {
@@ -479,7 +499,6 @@
                     <button class="btn btn-primary" onclick="handleAddPlayer()">Добавить</button>
                 </div>
                 <div class="btn-group">
-                    <!-- Изменено: "Случайный псевдоним" вместо "Случайный псевдоним" (было "Случайный псевдоним" - исправлено на "Случайный псевдоним") -->
                     <button class="btn btn-secondary" onclick="addRandomPlayer()">🎲 Случайный псевдоним</button>
                     <button class="btn btn-warning" onclick="shuffleNicknames()">🔄 Перемешать псевдонимы</button>
                     <button class="btn btn-danger" onclick="handleResetGame()">🔧 Сброс всех</button>
@@ -549,7 +568,7 @@
                 </div>
                 <div id="votingSection" class="hidden" style="margin-top: 12px;">
                     <label style="display: block; margin-bottom: 8px; color: #ccc;">За кого голосуют:</label>
-                    <select id="votingTarget" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff; margin-bottom: 12px;">
+                    <select id="votingTarget">
                         <option value="">Выберите игрока...</option>
                     </select>
                     <button class="btn btn-danger btn-block" onclick="eliminatePlayer()">🗑️ Исключить игрока</button>
@@ -962,10 +981,6 @@
             gamePhase = 'night';
             gameInProgress = true;
             
-            // Обновляем глобальные переменные в window для beforeunload
-            window.gameInProgress = gameInProgress;
-            window.players = players;
-            
             assignRoles();
             
             document.getElementById('setupPhase').classList.add('hidden');
@@ -1041,10 +1056,6 @@
                 results.push('🌙 Ночь прошла спокойно');
             }
             
-            // Обновляем глобальные переменные после изменений
-            window.players = players;
-            window.gameInProgress = gameInProgress;
-            
             showNightResults(results);
         }
         
@@ -1065,11 +1076,6 @@
             
             addLog(`☀️ Наступил день ${round}`, 'day');
             renderGamePlayersList();
-            
-            // Обновляем глобальные переменные после изменений
-            window.players = players;
-            window.gameInProgress = gameInProgress;
-            
             saveGame();
         }
         
@@ -1095,11 +1101,6 @@
                 
                 document.getElementById('votingSection').classList.add('hidden');
                 renderGamePlayersList();
-                
-                // Обновляем глобальные переменные после изменений
-                window.players = players;
-                window.gameInProgress = gameInProgress;
-                
                 saveGame();
                 
                 checkWinCondition();
@@ -1122,11 +1123,6 @@
             
             addLog(`🌙 Наступила ночь ${round}`, 'night');
             renderGamePlayersList();
-            
-            // Обновляем глобальные переменные после изменений
-            window.players = players;
-            window.gameInProgress = gameInProgress;
-            
             saveGame();
         }
         
@@ -1158,9 +1154,6 @@
                 timestamp: Date.now()
             };
             localStorage.setItem('mafiaGameState', JSON.stringify(gameState));
-            // Обновляем глобальные переменные для beforeunload
-            window.players = players;
-            window.gameInProgress = gameInProgress;
         }
         
         function loadGame() {
@@ -1172,10 +1165,6 @@
                     gamePhase = state.gamePhase || 'setup';
                     round = state.round || 1;
                     gameInProgress = state.gameInProgress || false;
-                    
-                    // Обновляем глобальные переменные для beforeunload
-                    window.players = players;
-                    window.gameInProgress = gameInProgress;
                     
                     if (gameInProgress && players.length > 0) {
                         document.getElementById('setupPhase').classList.add('hidden');
@@ -1217,10 +1206,6 @@
             gamePhase = 'setup';
             round = 1;
             gameInProgress = false;
-            
-            // Обновляем глобальные переменные для beforeunload
-            window.players = players;
-            window.gameInProgress = gameInProgress;
             
             localStorage.removeItem('mafiaGameState');
             
@@ -1284,7 +1269,6 @@
         window.eliminatePlayer = eliminatePlayer;
         window.skipDay = skipDay;
         window.saveGame = saveGame;
-        // Инициализируем глобальные переменные для beforeunload
         window.gameInProgress = gameInProgress;
         window.players = players;
     </script>

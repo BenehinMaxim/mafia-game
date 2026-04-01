@@ -13,20 +13,6 @@
     <link rel="manifest" href="./manifest.json">
     <link rel="apple-touch-icon" href="./icon-180.png">
     
-    <!-- Security -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' ;">
-    
-    <!-- Prevent accidental close -->
-    <script>
-        window.addEventListener('beforeunload', function (e) {
-            if (window.gameInProgress && window.players && window.players.length > 0) {
-                e.preventDefault();
-                e.returnValue = '';
-                return '';
-            }
-        });
-    </script>
-    
     <style>
         * {
             box-sizing: border-box;
@@ -46,7 +32,6 @@
             min-height: -webkit-fill-available;
             padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
             line-height: 1.5;
-            padding-top: max(20px, env(safe-area-inset-top));
         }
         
         .container {
@@ -99,6 +84,45 @@
             gap: 8px;
         }
         
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        
+        .mode-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .mode-card.selected {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.2);
+        }
+        
+        .mode-card .mode-emoji {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .mode-card .mode-name {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .mode-card .mode-desc {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 4px;
+        }
+        
         .input-group {
             display: flex;
             gap: 10px;
@@ -120,10 +144,6 @@
         .input-group input:focus {
             outline: none;
             border-color: #4CAF50;
-        }
-        
-        .input-group input::placeholder {
-            color: #888;
         }
         
         .btn {
@@ -151,34 +171,12 @@
             cursor: not-allowed;
         }
         
-        .btn-primary {
-            background: #4CAF50;
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: rgba(255,255,255,0.15);
-            color: white;
-        }
-        
-        .btn-success {
-            background: #2196F3;
-            color: white;
-        }
-        
-        .btn-danger {
-            background: #f44336;
-            color: white;
-        }
-        
-        .btn-warning {
-            background: #ff9800;
-            color: white;
-        }
-        
-        .btn-block {
-            width: 100%;
-        }
+        .btn-primary { background: #4CAF50; color: white; }
+        .btn-secondary { background: rgba(255,255,255,0.15); color: white; }
+        .btn-success { background: #2196F3; color: white; }
+        .btn-danger { background: #f44336; color: white; }
+        .btn-warning { background: #ff9800; color: white; }
+        .btn-block { width: 100%; }
         
         .btn-group {
             display: flex;
@@ -202,6 +200,8 @@
             background: rgba(255,255,255,0.05);
             border-radius: 8px;
             margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         
         .player-name {
@@ -215,15 +215,20 @@
             margin-left: 8px;
         }
         
-        .player-role.revealed {
-            color: #4CAF50;
+        .player-role.revealed { color: #4CAF50; }
+        .player-role-select {
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            font-size: 0.8rem;
         }
         
         .player-actions {
             display: flex;
             gap: 6px;
             flex-shrink: 0;
-            margin-left: 8px;
         }
         
         .player-actions button {
@@ -236,48 +241,21 @@
             cursor: pointer;
         }
         
-        .player-actions button:active {
-            background: rgba(255,255,255,0.2);
-        }
-        
         .phase-indicator {
             text-align: center;
             padding: 12px;
-            background: rgba(33,150,243,0.2);
             border-radius: 10px;
             margin-bottom: 16px;
             font-weight: 500;
         }
+        .phase-indicator.night { background: rgba(156,39,176,0.2); }
+        .phase-indicator.day { background: rgba(255,193,7,0.2); }
         
-        .phase-indicator.night {
-            background: rgba(156,39,176,0.2);
-        }
+        .night-actions { display: grid; gap: 12px; }
+        .night-action-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; }
+        .night-action-item label { display: block; font-size: 0.9rem; margin-bottom: 8px; color: #ccc; }
         
-        .phase-indicator.day {
-            background: rgba(255,193,7,0.2);
-        }
-        
-        .night-actions {
-            display: grid;
-            gap: 12px;
-        }
-        
-        .night-action-item {
-            background: rgba(255,255,255,0.05);
-            padding: 12px;
-            border-radius: 10px;
-        }
-        
-        .night-action-item label {
-            display: block;
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-            color: #ccc;
-        }
-        
-        /* FIX: Select dropdown styles for iOS readability */
-        .night-action-item select,
-        #votingTarget {
+        .night-action-item select, #votingTarget {
             width: 100%;
             padding: 14px 16px;
             border-radius: 8px;
@@ -286,34 +264,30 @@
             color: #ffffff;
             font-size: 1rem;
             font-weight: 500;
-            -webkit-user-select: none;
-            user-select: none;
-            cursor: pointer;
             appearance: none;
             -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 12px center;
             background-size: 20px;
             padding-right: 44px;
         }
         
-        .night-action-item select:focus,
-        #votingTarget:focus {
-            outline: none;
-            border-color: #4CAF50;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        .role-assign-list {
+            max-height: 400px;
+            overflow-y: auto;
         }
         
-        /* FIX: Force dark background for dropdown options on iOS */
-        .night-action-item select option,
-        #votingTarget option {
-            background: #0d1117 !important;
-            color: #ffffff !important;
-            padding: 12px !important;
-            font-size: 1rem !important;
-            font-weight: 500 !important;
+        .role-assign-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         
         .log-container {
@@ -323,41 +297,13 @@
             border-radius: 8px;
             padding: 12px;
             font-size: 0.9rem;
-            line-height: 1.6;
             -webkit-overflow-scrolling: touch;
         }
         
-        .log-entry {
-            padding: 4px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        
-        .log-entry:last-child {
-            border-bottom: none;
-        }
-        
-        .log-entry.night {
-            color: #ce93d8;
-        }
-        
-        .log-entry.day {
-            color: #fff59d;
-        }
-        
-        .log-entry.action {
-            color: #81c784;
-        }
-        
-        .rules-list {
-            font-size: 0.9rem;
-            line-height: 1.8;
-            color: #ccc;
-            padding-left: 20px;
-        }
-        
-        .rules-list li {
-            margin-bottom: 4px;
-        }
+        .log-entry { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .log-entry.night { color: #ce93d8; }
+        .log-entry.day { color: #fff59d; }
+        .log-entry.action { color: #81c784; }
         
         .modal {
             display: none;
@@ -373,9 +319,7 @@
             padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
         }
         
-        .modal.active {
-            display: flex;
-        }
+        .modal.active { display: flex; }
         
         .modal-content {
             background: #1a1a2e;
@@ -385,30 +329,14 @@
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
         }
         
-        .modal-title {
-            font-size: 1.3rem;
-            margin-bottom: 16px;
-            text-align: center;
-        }
+        .modal-title { font-size: 1.3rem; margin-bottom: 16px; text-align: center; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-actions .btn { flex: 1; }
         
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
+        .hidden { display: none !important; }
         
-        .modal-actions .btn {
-            flex: 1;
-        }
-        
-        .hidden {
-            display: none !important;
-        }
-        
-        /* Toast Notifications */
         .toast {
             position: fixed;
             bottom: max(20px, env(safe-area-inset-bottom));
@@ -418,71 +346,34 @@
             color: white;
             padding: 12px 24px;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             z-index: 10000;
             animation: slideUp 0.3s ease;
-            font-size: 14px;
             max-width: 90%;
             text-align: center;
         }
-        
-        .toast.error {
-            background: #f44336;
-        }
-        
-        .toast.warning {
-            background: #ff9800;
-        }
-        
-        .toast.info {
-            background: #2196F3;
-        }
+        .toast.error { background: #f44336; }
+        .toast.warning { background: #ff9800; }
+        .toast.info { background: #2196F3; }
         
         @keyframes slideUp {
-            from {
-                bottom: -50px;
-                opacity: 0;
-            }
-            to {
-                bottom: max(20px, env(safe-area-inset-bottom));
-                opacity: 1;
-            }
+            from { bottom: -50px; opacity: 0; }
+            to { bottom: max(20px, env(safe-area-inset-bottom)); opacity: 1; }
         }
         
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.3);
-            border-radius: 3px;
-        }
-        
-        /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: 20px;
-            color: #888;
-        }
-        
-        /* Role colors */
         .role-mafia { color: #f44336; }
+        .role-don { color: #ff6b6b; }
+        .role-sheriff { color: #2196F3; }
         .role-doctor { color: #4CAF50; }
         .role-commissioner { color: #2196F3; }
         .role-civilian { color: #9e9e9e; }
         
-        /* iPhone notch support */
-        @supports (padding: max(0px)) {
-            body {
-                padding-left: max(16px, env(safe-area-inset-left));
-                padding-right: max(16px, env(safe-area-inset-right));
-            }
+        .info-badge {
+            background: rgba(33,150,243,0.2);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            margin-bottom: 12px;
+            text-align: center;
         }
     </style>
 </head>
@@ -491,83 +382,93 @@
         <header>
             <h1>🎭 Ведущий Мафии</h1>
             <div class="subtitle">Управляйте игрой легко</div>
-            <div class="save-indicator">
-                <span>💾</span>
-                <span>Автосохранение</span>
-                <span>✅</span>
-            </div>
+            <div class="save-indicator">💾 Автосохранение ✅</div>
         </header>
         
         <!-- Setup Phase -->
         <div id="setupPhase">
             <div class="card">
+                <div class="card-title">🎮 Режим игры</div>
+                <div class="mode-selector" id="modeSelector">
+                    <div class="mode-card" data-mode="auto_role">
+                        <span class="mode-emoji">🎭</span>
+                        <div class="mode-name">Ролевая (авто)</div>
+                        <div class="mode-desc">Мафия, доктор, комиссар</div>
+                    </div>
+                    <div class="mode-card" data-mode="card_role">
+                        <span class="mode-emoji">🃏</span>
+                        <div class="mode-name">Ролевая (карты)</div>
+                        <div class="mode-desc">Ведущий назначает роли</div>
+                    </div>
+                    <div class="mode-card" data-mode="auto_classic">
+                        <span class="mode-emoji">⚡</span>
+                        <div class="mode-name">Спортивная (авто)</div>
+                        <div class="mode-desc">Дон, шериф, мафия, мирные</div>
+                    </div>
+                    <div class="mode-card" data-mode="card_classic">
+                        <span class="mode-emoji">🃏⚡</span>
+                        <div class="mode-name">Спортивная (карты)</div>
+                        <div class="mode-desc">Ведущий назначает роли</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
                 <div class="card-title">➕ Добавить игрока</div>
                 <div class="input-group">
-                    <input type="text" id="playerNameInput" placeholder="Введите имя или нажмите 🎲..." maxlength="30">
+                    <input type="text" id="playerNameInput" placeholder="Введите имя..." maxlength="30">
                     <button class="btn btn-primary" onclick="handleAddPlayer()">Добавить</button>
                 </div>
                 <div class="btn-group">
                     <button class="btn btn-secondary" onclick="addRandomPlayer()">🎲 Случайный псевдоним</button>
-                    <button class="btn btn-warning" onclick="shuffleNicknames()">🔄 Перемешать псевдонимы</button>
-                    <button class="btn btn-danger" onclick="handleResetGame()">🔧 Сброс всех</button>
+                    <button class="btn btn-warning" onclick="shuffleNicknames()">🔄 Перемешать</button>
                 </div>
             </div>
             
             <div class="card">
-                <div class="card-title">📋 Игроки (<span id="playerCount">0</span>/20)</div>
+                <div class="card-title">📋 Игроки (<span id="playerCount">0</span>/<span id="maxPlayers">20</span>)</div>
                 <div id="playersList" class="players-list">
-                    <div class="empty-state">Нет игроков. Добавьте 4-20 игроков для начала игры.</div>
+                    <div class="empty-state">Нет игроков.</div>
                 </div>
-                <button class="btn btn-success btn-block" onclick="handleStartGame()">🎮 Новая игра</button>
+                <button class="btn btn-success btn-block" onclick="handleStartGame()">🎮 Начать игру</button>
+                <button class="btn btn-danger btn-block" onclick="handleResetGame()" style="margin-top: 8px;">🔧 Сброс всех</button>
             </div>
             
             <div class="card">
                 <div class="card-title">💡 Правила</div>
-                <ul class="rules-list">
-                    <li>🌙 <strong>1-я ночь</strong> — знакомство с ролями, без убийств</li>
+                <ul class="rules-list" id="rulesList">
+                    <li>🌙 <strong>1-я ночь</strong> — знакомство с ролями</li>
                     <li>☀️ <strong>1-й день</strong> — только обсуждение</li>
-                    <li>🌙 <strong>Со 2-й ночи</strong> — мафия убивает, доктор лечит, комиссар проверяет</li>
-                    <li>🗳️ <strong>Со 2-го дня</strong> — начинается голосование</li>
-                    <li>🎭 Роли распределяются случайно при старте</li>
+                    <li>🌙 <strong>Со 2-й ночи</strong> — активные действия</li>
+                    <li>🗳️ <strong>Со 2-го дня</strong> — голосование</li>
                 </ul>
+            </div>
+        </div>
+        
+        <!-- Role Assignment Modal (для карточных режимов) -->
+        <div id="roleAssignmentModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-title">🎭 Назначение ролей</div>
+                <div id="roleAssignList" class="role-assign-list"></div>
+                <div class="modal-actions">
+                    <button class="btn btn-success" onclick="confirmRoleAssignment()">✅ Подтвердить</button>
+                    <button class="btn btn-danger" onclick="closeRoleAssignment()">❌ Отмена</button>
+                </div>
             </div>
         </div>
         
         <!-- Game Phase -->
         <div id="gamePhase" class="hidden">
-            <div id="phaseIndicator" class="phase-indicator night">
-                🌙 Ночь <span id="roundNumber">1</span>
-            </div>
+            <div id="phaseIndicator" class="phase-indicator night">🌙 Ночь <span id="roundNumber">1</span></div>
             
-            <!-- Night Actions -->
             <div id="nightPhase" class="card">
                 <div class="card-title">🌙 Ночные действия</div>
-                <div class="night-actions">
-                    <div class="night-action-item">
-                        <label>🔪 Мафия убивает:</label>
-                        <select id="mafiaTarget">
-                            <option value="">Выберите игрока...</option>
-                        </select>
-                    </div>
-                    <div class="night-action-item">
-                        <label>💊 Доктор лечит:</label>
-                        <select id="doctorTarget">
-                            <option value="">Выберите игрока...</option>
-                        </select>
-                    </div>
-                    <div class="night-action-item">
-                        <label>🔍 Комиссар проверяет:</label>
-                        <select id="commissionerTarget">
-                            <option value="">Выберите игрока...</option>
-                        </select>
-                    </div>
-                </div>
+                <div id="nightActionsContainer" class="night-actions"></div>
                 <div style="margin-top: 16px;">
                     <button class="btn btn-success btn-block" onclick="completeNight()">✅ Завершить ночь</button>
                 </div>
             </div>
             
-            <!-- Day Phase -->
             <div id="dayPhase" class="card hidden">
                 <div class="card-title">☀️ Дневное заседание</div>
                 <div class="btn-group">
@@ -575,21 +476,17 @@
                     <button class="btn btn-secondary" onclick="skipDay()">⏭️ Пропустить день</button>
                 </div>
                 <div id="votingSection" class="hidden" style="margin-top: 12px;">
-                    <label style="display: block; margin-bottom: 8px; color: #ccc;">За кого голосуют:</label>
-                    <select id="votingTarget">
-                        <option value="">Выберите игрока...</option>
-                    </select>
-                    <button class="btn btn-danger btn-block" onclick="eliminatePlayer()">🗑️ Исключить игрока</button>
+                    <label style="display: block; margin-bottom: 8px;">За кого голосуют:</label>
+                    <select id="votingTarget"></select>
+                    <button class="btn btn-danger btn-block" onclick="eliminatePlayer()">🗑️ Исключить</button>
                 </div>
             </div>
             
-            <!-- Players List in Game -->
             <div class="card">
                 <div class="card-title">📋 Игроки</div>
                 <div id="gamePlayersList" class="players-list"></div>
             </div>
             
-            <!-- Event Log -->
             <div class="card">
                 <div class="card-title">📝 Лог событий</div>
                 <div id="eventLog" class="log-container"></div>
@@ -597,7 +494,7 @@
             
             <div class="btn-group">
                 <button class="btn btn-secondary" onclick="saveGame()">💾 Сохранить</button>
-                <button class="btn btn-danger" onclick="handleResetGame()">🔧 Завершить игру</button>
+                <button class="btn btn-danger" onclick="handleResetGame()">🔧 Завершить</button>
             </div>
         </div>
         
@@ -607,111 +504,60 @@
                 <div class="modal-title">🌙 Итоги ночи</div>
                 <div id="nightResultsContent"></div>
                 <div class="modal-actions">
-                    <button class="btn btn-success btn-block" onclick="closeNightResults()">Продолжить</button>
+                    <button class="btn btn-success" onclick="closeNightResults()">Продолжить</button>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Toast Container -->
     <div id="toastContainer"></div>
     
     <script>
         // ===== STATE =====
         let players = [];
+        let gameMode = 'auto_role'; // auto_role, card_role, auto_classic, card_classic
         let gamePhase = 'setup';
         let round = 1;
         let gameInProgress = false;
+        let pendingRoleAssignment = false;
         
-        // ===== MAFIA NICKNAMES WITH EMOJIS =====
+        // Роли для разных режимов
+        const roleConfig = {
+            auto_role: { roles: ['mafia', 'doctor', 'commissioner', 'civilian'], maxPlayers: 20, minPlayers: 4 },
+            card_role: { roles: ['mafia', 'doctor', 'commissioner', 'civilian'], maxPlayers: 20, minPlayers: 4 },
+            auto_classic: { roles: ['mafia', 'don', 'sheriff', 'civilian'], maxPlayers: 10, minPlayers: 4 },
+            card_classic: { roles: ['mafia', 'don', 'sheriff', 'civilian'], maxPlayers: 10, minPlayers: 4 }
+        };
+        
+        const roleNames = {
+            'mafia': '🔪 Мафия',
+            'don': '👑 Дон',
+            'doctor': '💊 Доктор',
+            'commissioner': '🔍 Комиссар',
+            'sheriff': '⭐ Шериф',
+            'civilian': '👤 Мирный'
+        };
+        
         const mafiaNicknames = [
-            { name: 'Дон Котлето', emoji: '🍖' },
-            { name: 'Крёстный Пельмень', emoji: '🥟' },
-            { name: 'Семья Семечек', emoji: '🌻' },
-            { name: 'Мафиоззо', emoji: '🎩' },
-            { name: 'Босс Борода', emoji: '🧔' },
-            { name: 'Капо Картошка', emoji: '🥔' },
-            { name: 'Консильери Колбаса', emoji: '🌭' },
-            { name: 'Омерта Оливье', emoji: '🥗' },
-            { name: 'Честный Вор', emoji: '🎭' },
-            { name: 'Налоговый Инспектор', emoji: '📊' },
-            { name: 'Благотворитель', emoji: '🎁' },
-            { name: 'Спонсор Мира', emoji: '🕊️' },
-            { name: 'Законопослушный', emoji: '⚖️' },
-            { name: 'Примерный Гражданин', emoji: '🏆' },
-            { name: 'Волонтёр Года', emoji: '🏅' },
-            { name: 'Филантроп', emoji: '💝' },
-            { name: 'Тихий Смерть', emoji: '🤫' },
-            { name: 'Нож В Спине', emoji: '🔪' },
-            { name: 'Бетонные Тапки', emoji: '👟' },
-            { name: 'Цементный Бизнес', emoji: '🏗️' },
-            { name: 'Чёрная Метка', emoji: '⚫' },
-            { name: 'Последний Звонок', emoji: '📞' },
-            { name: 'Тёмная Лошадка', emoji: '🐴' },
-            { name: 'Тень Отца', emoji: '👤' },
-            { name: 'Сантехник Судеб', emoji: '🔧' },
-            { name: 'Электрик Душ', emoji: '⚡' },
-            { name: 'Парикмахер Пальцев', emoji: '✂️' },
-            { name: 'Стоматолог Костей', emoji: '🦷' },
-            { name: 'Бухгалтер Теней', emoji: '📒' },
-            { name: 'Логист Исчезновений', emoji: '📦' },
-            { name: 'Менеджер Проблем', emoji: '💼' },
-            { name: 'HR Свидетелей', emoji: '📋' },
-            { name: 'Волк С Уолл-стрит', emoji: '🐺' },
-            { name: 'Кот Бегемот', emoji: '🐱' },
-            { name: 'Лис Патрикеевна', emoji: '🦊' },
-            { name: 'Шакал Таблетка', emoji: '🐕' },
-            { name: 'Голубь Миротворец', emoji: '🕊️' },
-            { name: 'Ворон Предвестник', emoji: '🦅' },
-            { name: 'Крыса Лабораторная', emoji: '🐀' },
-            { name: 'Змей Горыныч', emoji: '🐍' },
-            { name: 'Пирог С Начинкой', emoji: '🥧' },
-            { name: 'Борщ Секретный', emoji: '🍲' },
-            { name: 'Селедка Под Шубой', emoji: '🐟' },
-            { name: 'Оливье Сюрприз', emoji: '🥘' },
-            { name: 'Хинкали Сюрприз', emoji: '🥟' },
-            { name: 'Шаурма Теневая', emoji: '🌯' },
-            { name: 'Пельмень Судьбы', emoji: '🥟' },
-            { name: 'Блинчик Мести', emoji: '🥞' },
-            { name: 'Чемодан Без Ручки', emoji: '🧳' },
-            { name: 'Бетонная Роза', emoji: '🌹' },
-            { name: 'Золотой Пистолет', emoji: '🔫' },
-            { name: 'Тихий Пистолет', emoji: '🔇' },
-            { name: 'Громкая Тишина', emoji: '🔊' },
-            { name: 'Чёрный Мерседес', emoji: '🚗' },
-            { name: 'Кирпич Привет', emoji: '🧱' },
-            { name: 'Асфальт Цветы', emoji: '🛣️' },
-            { name: 'Терминатор Пенсионер', emoji: '🤖' },
-            { name: 'Рэмбо Дачник', emoji: '🏡' },
-            { name: 'Джон Уик Бухгалтер', emoji: '✏️' },
-            { name: 'Тони Старч Запойный', emoji: '🍺' },
-            { name: 'Волк Однорогий', emoji: '🦄' },
-            { name: 'Заяц Безумный', emoji: '🐰' },
-            { name: 'Медведь Веган', emoji: '🐻' },
-            { name: 'Ёжик В Тумане', emoji: '🦔' },
-            { name: 'Никто Никто', emoji: '👻' },
-            { name: 'Имя Засекречено', emoji: '🔐' },
-            { name: 'Свидетель Программы', emoji: '👁️' },
-            { name: 'Анонимус Анонимус', emoji: '🎭' },
-            { name: 'Инкогнито Инкогнито', emoji: '🕵️' },
-            { name: 'Мистер Икс', emoji: '❌' },
-            { name: 'Человек Никто', emoji: '👤' },
-            { name: 'Призрак Оперы', emoji: '👻' },
-            { name: 'Тот Самый', emoji: '🎯' },
-            { name: 'Который Знает', emoji: '🧠' },
-            { name: 'Не Спрашивай', emoji: '🤐' },
-            { name: 'Лучше Не Знать', emoji: '🙈' }
+            { name: 'Дон Котлето', emoji: '🍖' }, { name: 'Крёстный Пельмень', emoji: '🥟' },
+            { name: 'Семья Семечек', emoji: '🌻' }, { name: 'Мафиоззо', emoji: '🎩' },
+            { name: 'Босс Борода', emoji: '🧔' }, { name: 'Капо Картошка', emoji: '🥔' },
+            { name: 'Консильери Колбаса', emoji: '🌭' }, { name: 'Омерта Оливье', emoji: '🥗' },
+            { name: 'Честный Вор', emoji: '🎭' }, { name: 'Налоговый Инспектор', emoji: '📊' },
+            { name: 'Тихий Смерть', emoji: '🤫' }, { name: 'Нож В Спине', emoji: '🔪' },
+            { name: 'Бетонные Тапки', emoji: '👟' }, { name: 'Чёрная Метка', emoji: '⚫' },
+            { name: 'Тёмная Лошадка', emoji: '🐴' }, { name: 'Тень Отца', emoji: '👤' },
+            { name: 'Волк С Уолл-стрит', emoji: '🐺' }, { name: 'Кот Бегемот', emoji: '🐱' },
+            { name: 'Ёжик В Тумане', emoji: '🦔' }, { name: 'Мистер Икс', emoji: '❌' }
         ];
         
         // ===== UTILITIES =====
-        
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.textContent = message;
             container.appendChild(toast);
-            
             setTimeout(() => {
                 toast.style.animation = 'slideUp 0.3s ease reverse';
                 setTimeout(() => toast.remove(), 300);
@@ -725,116 +571,104 @@
             return div.innerHTML.trim().slice(0, 30);
         }
         
-        function validatePlayerName(name, existingPlayers = []) {
-            const sanitizedName = sanitizeInput(name);
+        function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
+        
+        function escapeHtml(text) { return text.replace(/[&<>]/g, function(m) { return {'&':'&amp;','<':'&lt;','>':'&gt;'}[m]; }); }
+        
+        function updateMaxPlayers() {
+            const config = roleConfig[gameMode];
+            document.getElementById('maxPlayers').textContent = config.maxPlayers;
+            document.getElementById('playerCount').textContent = players.length;
             
-            if (!sanitizedName) {
-                showToast('Введите имя игрока', 'error');
-                return null;
+            // Обновляем правила
+            const rulesList = document.getElementById('rulesList');
+            if (gameMode.includes('classic')) {
+                rulesList.innerHTML = `
+                    <li>👑 <strong>Дон</strong> — узнаёт шерифа при проверке, но не убивает</li>
+                    <li>⭐ <strong>Шериф</strong> — проверяет игроков, видит мафию/дона</li>
+                    <li>🔪 <strong>Мафия</strong> — убивает каждую ночь</li>
+                    <li>🌙 <strong>1-я ночь</strong> — знакомство с ролями</li>
+                    <li>🗳️ <strong>Со 2-го дня</strong> — голосование</li>
+                    <li>🏆 <strong>Игра до 10 человек</strong></li>
+                `;
+            } else {
+                rulesList.innerHTML = `
+                    <li>🌙 <strong>1-я ночь</strong> — знакомство с ролями, без убийств</li>
+                    <li>☀️ <strong>1-й день</strong> — только обсуждение</li>
+                    <li>🌙 <strong>Со 2-й ночи</strong> — мафия убивает, доктор лечит, комиссар проверяет</li>
+                    <li>🗳️ <strong>Со 2-го дня</strong> — начинается голосование</li>
+                `;
             }
-            
-            if (sanitizedName.length < 2) {
-                showToast('Имя должно быть не менее 2 символов', 'error');
-                return null;
-            }
-            
-            const isDuplicate = existingPlayers.some(p => 
-                p.name.toLowerCase() === sanitizedName.toLowerCase()
-            );
-            
-            if (isDuplicate) {
-                showToast('Игрок с таким именем уже существует', 'warning');
-                return null;
-            }
-            
-            return sanitizedName;
         }
         
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2);
-        }
-        
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        // ===== MODE SELECTION =====
+        function selectMode(mode) {
+            gameMode = mode;
+            document.querySelectorAll('.mode-card').forEach(card => {
+                if (card.dataset.mode === mode) card.classList.add('selected');
+                else card.classList.remove('selected');
+            });
+            updateMaxPlayers();
+            showToast(`Режим: ${mode === 'auto_role' ? 'Ролевая (авто)' : mode === 'card_role' ? 'Ролевая (карты)' : mode === 'auto_classic' ? 'Спортивная (авто)' : 'Спортивная (карты)'}`, 'info');
         }
         
         // ===== PLAYER MANAGEMENT =====
-        
         function addPlayer(name, emoji = null) {
-            const sanitizedName = validatePlayerName(name, players);
-            if (!sanitizedName) return false;
+            const config = roleConfig[gameMode];
+            if (players.length >= config.maxPlayers) {
+                showToast(`⚠️ Максимум ${config.maxPlayers} игроков!`, 'error');
+                return false;
+            }
             
-            const player = {
-                id: generateId(),
-                name: sanitizedName,
-                emoji: emoji,
-                role: null,
-                isAlive: true,
-                isEliminated: false
-            };
+            const sanitizedName = sanitizeInput(name);
+            if (!sanitizedName || sanitizedName.length < 2) {
+                showToast('Введите имя (мин. 2 символа)', 'error');
+                return false;
+            }
             
-            players.push(player);
+            if (players.some(p => p.name.toLowerCase() === sanitizedName.toLowerCase())) {
+                showToast('Игрок с таким именем уже есть', 'warning');
+                return false;
+            }
+            
+            players.push({ id: generateId(), name: sanitizedName, emoji: emoji, role: null, isAlive: true, isEliminated: false });
             renderPlayersList();
-            updatePlayerCount();
+            updateMaxPlayers();
             saveGame();
             return true;
         }
         
         function addRandomPlayer() {
-            // Проверка на максимальное количество игроков
-            if (players.length >= 20) {
-                showToast('⚠️ Максимум 20 игроков!', 'error');
+            const config = roleConfig[gameMode];
+            if (players.length >= config.maxPlayers) {
+                showToast(`⚠️ Максимум ${config.maxPlayers} игроков!`, 'error');
                 return;
             }
             
             const usedNames = players.map(p => p.name.toLowerCase());
-            const availableNicknames = mafiaNicknames.filter(n => !usedNames.includes(n.name.toLowerCase()));
+            const available = mafiaNicknames.filter(n => !usedNames.includes(n.name.toLowerCase()));
+            if (available.length === 0) { showToast('🎭 Все псевдонимы заняты!', 'warning'); return; }
             
-            if (availableNicknames.length === 0) {
-                showToast('🎭 Все псевдонимы заняты!', 'warning');
-                return;
-            }
-            
-            const randomNickname = availableNicknames[Math.floor(Math.random() * availableNicknames.length)];
-            const player = {
-                id: generateId(),
-                name: randomNickname.name,
-                emoji: randomNickname.emoji,
-                role: null,
-                isAlive: true,
-                isEliminated: false
-            };
-            
-            players.push(player);
+            const random = available[Math.floor(Math.random() * available.length)];
+            players.push({ id: generateId(), name: random.name, emoji: random.emoji, role: null, isAlive: true, isEliminated: false });
             renderPlayersList();
-            updatePlayerCount();
+            updateMaxPlayers();
             saveGame();
-            showToast(`🎭 Добавлен: ${randomNickname.emoji} ${randomNickname.name}`, 'success');
+            showToast(`🎭 Добавлен: ${random.emoji} ${random.name}`, 'success');
         }
         
         function shuffleNicknames() {
-            if (players.length === 0) {
-                showToast('Нет игроков для перемешивания', 'warning');
-                return;
-            }
-            
+            if (players.length === 0) { showToast('Нет игроков', 'warning'); return; }
             const usedNames = players.map(p => p.name.toLowerCase());
-            const availableNicknames = mafiaNicknames.filter(n => !usedNames.includes(n.name.toLowerCase()));
+            const available = mafiaNicknames.filter(n => !usedNames.includes(n.name.toLowerCase()));
+            if (available.length < players.length) { showToast('Недостаточно свободных псевдонимов', 'warning'); return; }
             
-            if (availableNicknames.length < players.length) {
-                showToast('Недостаточно свободных псевдонимов', 'warning');
-                return;
-            }
-            
-            players.forEach((player) => {
-                const randomIndex = Math.floor(Math.random() * availableNicknames.length);
-                player.name = availableNicknames[randomIndex].name;
-                player.emoji = availableNicknames[randomIndex].emoji;
-                availableNicknames.splice(randomIndex, 1);
+            players.forEach(player => {
+                const randomIndex = Math.floor(Math.random() * available.length);
+                player.name = available[randomIndex].name;
+                player.emoji = available[randomIndex].emoji;
+                available.splice(randomIndex, 1);
             });
-            
             renderPlayersList();
             saveGame();
             showToast('🎭 Псевдонимы перемешаны!', 'success');
@@ -842,155 +676,132 @@
         
         function removePlayer(playerId) {
             const index = players.findIndex(p => p.id === playerId);
-            if (index !== -1) {
-                const playerName = players[index].name;
-                players.splice(index, 1);
-                renderPlayersList();
-                updatePlayerCount();
-                saveGame();
-                showToast(`Игрок "${playerName}" удалён`, 'info');
-            }
+            if (index !== -1) { players.splice(index, 1); renderPlayersList(); updateMaxPlayers(); saveGame(); }
         }
         
         function renderPlayersList() {
             const list = document.getElementById('playersList');
+            if (players.length === 0) { list.innerHTML = '<div class="empty-state">Нет игроков.</div>'; return; }
+            list.innerHTML = players.map(player => `
+                <div class="player-item">
+                    <span class="player-name">${player.emoji || '🎭'} ${escapeHtml(player.name)}</span>
+                    <div class="player-actions"><button onclick="removePlayer('${player.id}')">✕</button></div>
+                </div>
+            `).join('');
+        }
+        
+        // ===== ROLE ASSIGNMENT =====
+        function getAvailableRolesForMode() {
+            const config = roleConfig[gameMode];
+            const playerCount = players.length;
             
-            if (players.length === 0) {
-                list.innerHTML = '<div class="empty-state">Нет игроков. Добавьте 4-20 игроков для начала игры.</div>';
-                return;
+            if (gameMode.includes('classic')) {
+                // Спортивная мафия: мафия 30-40%, дон, шериф
+                const mafiaCount = Math.max(1, Math.floor(playerCount * 0.35));
+                const roles = [];
+                for (let i = 0; i < mafiaCount - 1; i++) roles.push('mafia');
+                roles.push('don'); // дон вместо одного мафиози
+                if (playerCount >= 5) roles.push('sheriff');
+                while (roles.length < playerCount) roles.push('civilian');
+                return roles;
+            } else {
+                // Ролевая мафия
+                const mafiaCount = Math.max(1, Math.floor(playerCount * 0.25));
+                const roles = [];
+                for (let i = 0; i < mafiaCount; i++) roles.push('mafia');
+                if (playerCount >= 6) roles.push('doctor');
+                if (playerCount >= 5) roles.push('commissioner');
+                while (roles.length < playerCount) roles.push('civilian');
+                return roles;
             }
-            
-            list.innerHTML = players.map((player) => {
-                const emoji = player.emoji || '🎭';
-                return `
-                    <div class="player-item">
-                        <span class="player-name">${emoji} ${escapeHtml(player.name)}</span>
-                        <div class="player-actions">
-                            <button onclick="removePlayer('${player.id}')" title="Удалить">✕</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
         }
         
-        function renderGamePlayersList() {
-            const list = document.getElementById('gamePlayersList');
-            
-            if (players.length === 0) {
-                list.innerHTML = '<div class="empty-state">Нет игроков</div>';
-                return;
-            }
-            
-            list.innerHTML = players.map((player) => {
-                const emoji = player.emoji || '🎭';
-                const roleClass = player.role ? `role-${player.role}` : '';
-                const roleText = player.role ? ` • ${getRoleName(player.role)}` : '';
-                const statusIcon = !player.isAlive ? '💀' : (player.isEliminated ? '🗑️' : '✅');
-                
-                return `
-                    <div class="player-item">
-                        <span>
-                            <span class="player-name">${emoji} ${escapeHtml(player.name)}</span>
-                            <span class="player-role ${player.role ? 'revealed' : ''} ${roleClass}">${roleText}</span>
-                        </span>
-                        <span>${statusIcon}</span>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        function updatePlayerCount() {
-            document.getElementById('playerCount').textContent = players.length;
-        }
-        
-        // ===== GAME LOGIC =====
-        
-        function assignRoles() {
-            const playerCount = players.filter(p => p.isAlive).length;
-            const roles = [];
-            
-            const mafiaCount = Math.max(1, Math.floor(playerCount * 0.25));
-            const hasDoctor = playerCount >= 6;
-            const hasCommissioner = playerCount >= 5;
-            
-            for (let i = 0; i < mafiaCount; i++) roles.push('mafia');
-            if (hasDoctor) roles.push('doctor');
-            if (hasCommissioner) roles.push('commissioner');
-            while (roles.length < playerCount) roles.push('civilian');
-            
+        function autoAssignRoles() {
+            const roles = getAvailableRolesForMode();
             for (let i = roles.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [roles[i], roles[j]] = [roles[j], roles[i]];
             }
             
-            const alivePlayers = players.filter(p => p.isAlive);
-            alivePlayers.forEach((player, index) => {
-                player.role = roles[index];
+            players.forEach((player, index) => { player.role = roles[index]; });
+            
+            const roleCounts = {};
+            players.forEach(p => { roleCounts[p.role] = (roleCounts[p.role] || 0) + 1; });
+            const roleSummary = Object.entries(roleCounts).map(([r, c]) => `${roleNames[r]}: ${c}`).join(', ');
+            addLog(`🎭 Роли распределены: ${roleSummary}`, 'action');
+        }
+        
+        function showRoleAssignmentModal() {
+            const config = roleConfig[gameMode];
+            const possibleRoles = config.roles.filter(r => r !== 'civilian');
+            const mafiaCount = gameMode.includes('classic') ? Math.max(1, Math.floor(players.length * 0.35)) : Math.max(1, Math.floor(players.length * 0.25));
+            
+            const list = document.getElementById('roleAssignList');
+            list.innerHTML = players.map(player => `
+                <div class="role-assign-item">
+                    <span>${player.emoji || '🎭'} ${escapeHtml(player.name)}</span>
+                    <select class="role-select" data-player-id="${player.id}">
+                        <option value="civilian">👤 Мирный</option>
+                        ${possibleRoles.includes('mafia') ? '<option value="mafia">🔪 Мафия</option>' : ''}
+                        ${possibleRoles.includes('don') ? '<option value="don">👑 Дон</option>' : ''}
+                        ${possibleRoles.includes('doctor') ? '<option value="doctor">💊 Доктор</option>' : ''}
+                        ${possibleRoles.includes('commissioner') ? '<option value="commissioner">🔍 Комиссар</option>' : ''}
+                        ${possibleRoles.includes('sheriff') ? '<option value="sheriff">⭐ Шериф</option>' : ''}
+                    </select>
+                </div>
+            `).join('');
+            
+            document.getElementById('roleAssignmentModal').classList.add('active');
+        }
+        
+        function confirmRoleAssignment() {
+            const selects = document.querySelectorAll('#roleAssignList .role-select');
+            selects.forEach(select => {
+                const playerId = select.dataset.playerId;
+                const player = players.find(p => p.id === playerId);
+                if (player) player.role = select.value;
             });
             
-            addLog(`🎭 Роли распределены: ${mafiaCount} мафия, ${hasDoctor ? '1 доктор, ' : ''}${hasCommissioner ? '1 комиссар' : ''}${playerCount - mafiaCount - (hasDoctor ? 1 : 0) - (hasCommissioner ? 1 : 0)} мирных`, 'action');
-        }
-        
-        function getRoleName(role) {
-            const roles = {
-                'mafia': '🔪 Мафия',
-                'doctor': '💊 Доктор',
-                'commissioner': '🔍 Комиссар',
-                'civilian': '👤 Мирный'
-            };
-            return roles[role] || role;
-        }
-        
-        function addLog(message, type = 'day') {
-            const log = document.getElementById('eventLog');
-            const entry = document.createElement('div');
-            entry.className = `log-entry ${type}`;
-            entry.textContent = `[${new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'})}] ${message}`;
-            log.appendChild(entry);
-            log.scrollTop = log.scrollHeight;
-        }
-        
-        function updateNightTargets() {
-            const alivePlayers = players.filter(p => p.isAlive);
-            const options = '<option value="">Выберите игрока...</option>' + 
-                alivePlayers.map(p => {
-                    const emoji = p.emoji || '🎭';
-                    return `<option value="${p.id}">${emoji} ${escapeHtml(p.name)}</option>`;
-                }).join('');
+            document.getElementById('roleAssignmentModal').classList.remove('active');
             
-            document.getElementById('mafiaTarget').innerHTML = options;
-            document.getElementById('doctorTarget').innerHTML = options;
-            document.getElementById('commissionerTarget').innerHTML = options;
-            document.getElementById('votingTarget').innerHTML = options;
+            const roleCounts = {};
+            players.forEach(p => { roleCounts[p.role] = (roleCounts[p.role] || 0) + 1; });
+            const roleSummary = Object.entries(roleCounts).map(([r, c]) => `${roleNames[r]}: ${c}`).join(', ');
+            addLog(`🎭 Роли назначены ведущим: ${roleSummary}`, 'action');
+            
+            startGameAfterRoles();
         }
         
-        // ===== PHASE MANAGEMENT =====
+        function closeRoleAssignment() {
+            document.getElementById('roleAssignmentModal').classList.remove('active');
+        }
         
+        // ===== GAME INIT =====
         function handleStartGame() {
-            // Проверка на минимальное количество игроков
-            if (players.length < 4) {
-                showToast('⚠️ Минимум 4 игрока!', 'error');
+            const config = roleConfig[gameMode];
+            if (players.length < config.minPlayers) {
+                showToast(`⚠️ Минимум ${config.minPlayers} игрока!`, 'error');
+                return;
+            }
+            if (players.length > config.maxPlayers) {
+                showToast(`⚠️ Максимум ${config.maxPlayers} игроков!`, 'error');
                 return;
             }
             
-            // Проверка на максимальное количество игроков
-            if (players.length > 20) {
-                showToast('⚠️ Максимум 20 игроков!', 'error');
-                return;
-            }
-            
-            players.forEach(p => {
-                p.role = null;
-                p.isAlive = true;
-                p.isEliminated = false;
-            });
-            
+            players.forEach(p => { p.role = null; p.isAlive = true; p.isEliminated = false; });
             round = 1;
-            gamePhase = 'night';
             gameInProgress = true;
             
-            assignRoles();
-            
+            if (gameMode === 'auto_role' || gameMode === 'auto_classic') {
+                autoAssignRoles();
+                startGameAfterRoles();
+            } else {
+                showRoleAssignmentModal();
+            }
+        }
+        
+        function startGameAfterRoles() {
+            gamePhase = 'night';
             document.getElementById('setupPhase').classList.add('hidden');
             document.getElementById('gamePhase').classList.remove('hidden');
             document.getElementById('nightPhase').classList.remove('hidden');
@@ -998,72 +809,114 @@
             document.getElementById('eventLog').innerHTML = '';
             
             renderGamePlayersList();
-            updateNightTargets();
+            updateNightActionsUI();
             updatePhaseIndicator();
             
             addLog('🎮 Игра началась!', 'action');
-            addLog('🌙 Первая ночь — игроки знакомятся с ролями', 'night');
-            
+            addLog('🌙 Первая ночь — знакомство с ролями', 'night');
             saveGame();
-            showToast('Игра началась! Удачи! 🎭', 'success');
+            showToast('Игра началась! 🎭', 'success');
         }
         
-        function updatePhaseIndicator() {
-            const indicator = document.getElementById('phaseIndicator');
-            const roundEl = document.getElementById('roundNumber');
+        function renderGamePlayersList() {
+            const list = document.getElementById('gamePlayersList');
+            if (players.length === 0) { list.innerHTML = '<div class="empty-state">Нет игроков</div>'; return; }
             
-            roundEl.textContent = round;
+            list.innerHTML = players.map(player => {
+                const roleClass = player.role ? `role-${player.role}` : '';
+                const roleText = player.role ? ` • ${roleNames[player.role]}` : '';
+                const statusIcon = !player.isAlive ? '💀' : (player.isEliminated ? '🗑️' : '✅');
+                return `
+                    <div class="player-item">
+                        <span><span class="player-name">${player.emoji || '🎭'} ${escapeHtml(player.name)}</span>
+                        <span class="player-role ${player.role ? 'revealed' : ''} ${roleClass}">${roleText}</span></span>
+                        <span>${statusIcon}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateNightActionsUI() {
+            const container = document.getElementById('nightActionsContainer');
+            const alivePlayers = players.filter(p => p.isAlive);
+            const options = '<option value="">Выберите игрока...</option>' + 
+                alivePlayers.map(p => `<option value="${p.id}">${p.emoji || '🎭'} ${escapeHtml(p.name)}</option>`).join('');
             
-            if (gamePhase === 'night') {
-                indicator.className = 'phase-indicator night';
-                indicator.innerHTML = `🌙 Ночь <span id="roundNumber">${round}</span>`;
-            } else {
-                indicator.className = 'phase-indicator day';
-                indicator.innerHTML = `☀️ День <span id="roundNumber">${round}</span>`;
+            const hasMafia = players.some(p => (p.role === 'mafia' || p.role === 'don') && p.isAlive);
+            const hasDoctor = players.some(p => p.role === 'doctor' && p.isAlive);
+            const hasCommissioner = players.some(p => p.role === 'commissioner' && p.isAlive);
+            const hasSheriff = players.some(p => p.role === 'sheriff' && p.isAlive);
+            
+            let html = '';
+            if (hasMafia && round > 1) {
+                html += `<div class="night-action-item"><label>🔪 ${gameMode.includes('classic') ? 'Мафия и Дон убивают:' : 'Мафия убивает:'}</label>
+                         <select id="mafiaTarget">${options}</select></div>`;
             }
+            if (hasDoctor && !gameMode.includes('classic')) {
+                html += `<div class="night-action-item"><label>💊 Доктор лечит:</label>
+                         <select id="doctorTarget">${options}</select></div>`;
+            }
+            if (hasCommissioner && !gameMode.includes('classic')) {
+                html += `<div class="night-action-item"><label>🔍 Комиссар проверяет:</label>
+                         <select id="commissionerTarget">${options}</select></div>`;
+            }
+            if (hasSheriff && gameMode.includes('classic')) {
+                html += `<div class="night-action-item"><label>⭐ Шериф проверяет:</label>
+                         <select id="sheriffTarget">${options}</select></div>`;
+            }
+            
+            if (html === '') html = '<div class="info-badge">🌙 Ночных действий нет (1-я ночь или все роли мертвы)</div>';
+            container.innerHTML = html;
         }
         
         function completeNight() {
             if (round === 1) {
-                addLog('🌙 Первая ночь завершена', 'night');
-                showNightResults(['Это была ознакомительная ночь. Роли не действуют.']);
+                showNightResults(['🌙 Первая ночь завершена. Игроки познакомились со своими ролями.']);
                 return;
             }
             
-            const mafiaTarget = document.getElementById('mafiaTarget').value;
-            const doctorTarget = document.getElementById('doctorTarget').value;
-            const commissionerTarget = document.getElementById('commissionerTarget').value;
-            
             const results = [];
+            const mafiaTarget = document.getElementById('mafiaTarget')?.value;
+            const doctorTarget = document.getElementById('doctorTarget')?.value;
+            const commissionerTarget = document.getElementById('commissionerTarget')?.value;
+            const sheriffTarget = document.getElementById('sheriffTarget')?.value;
             
+            // Убийство мафии
             if (mafiaTarget) {
                 const target = players.find(p => p.id === mafiaTarget);
                 if (target && target.isAlive) {
-                    const emoji = target.emoji || '🎭';
-                    if (doctorTarget === mafiaTarget) {
-                        results.push(`💊 Доктор спас ${emoji} ${escapeHtml(target.name)} от мафии!`);
+                    if (doctorTarget === mafiaTarget && !gameMode.includes('classic')) {
+                        results.push(`💊 Доктор спас ${target.emoji || '🎭'} ${escapeHtml(target.name)}!`);
                         addLog(`💊 Доктор спас ${target.name}`, 'action');
                     } else {
                         target.isAlive = false;
-                        results.push(`🔪 ${emoji} ${escapeHtml(target.name)} был убит мафией!`);
+                        results.push(`🔪 ${target.emoji || '🎭'} ${escapeHtml(target.name)} был убит!`);
                         addLog(`🔪 Мафия убила ${target.name}`, 'night');
                     }
                 }
             }
             
+            // Проверка комиссара (ролевая)
             if (commissionerTarget) {
                 const target = players.find(p => p.id === commissionerTarget);
                 if (target && target.isAlive) {
-                    const roleRevealed = target.role === 'mafia' ? 'мафия' : 'мирный';
-                    results.push(`🔍 Комиссар проверил ${escapeHtml(target.name)}: ${roleRevealed}`);
+                    const isMafia = target.role === 'mafia';
+                    results.push(`🔍 Комиссар проверил ${escapeHtml(target.name)}: ${isMafia ? '🔪 МАФИЯ!' : '👤 МИРНЫЙ'}`);
                     addLog(`🔍 Комиссар проверил ${target.name}`, 'action');
                 }
             }
             
-            if (results.length === 0) {
-                results.push('🌙 Ночь прошла спокойно');
+            // Проверка шерифа (спортивная)
+            if (sheriffTarget) {
+                const target = players.find(p => p.id === sheriffTarget);
+                if (target && target.isAlive) {
+                    const isMafia = target.role === 'mafia' || target.role === 'don';
+                    results.push(`⭐ Шериф проверил ${escapeHtml(target.name)}: ${isMafia ? '🔪 МАФИЯ/ДОН!' : '👤 МИРНЫЙ'}`);
+                    addLog(`⭐ Шериф проверил ${target.name}`, 'action');
+                }
             }
             
+            if (results.length === 0) results.push('🌙 Ночь прошла спокойно');
             showNightResults(results);
         }
         
@@ -1075,7 +928,6 @@
         
         function closeNightResults() {
             document.getElementById('nightResultsModal').classList.remove('active');
-            
             gamePhase = 'day';
             document.getElementById('nightPhase').classList.add('hidden');
             document.getElementById('dayPhase').classList.remove('hidden');
@@ -1084,34 +936,34 @@
             
             addLog(`☀️ Наступил день ${round}`, 'day');
             renderGamePlayersList();
+            checkWinCondition();
             saveGame();
         }
         
         function startVoting() {
+            const alivePlayers = players.filter(p => p.isAlive);
+            const options = '<option value="">Выберите игрока...</option>' + 
+                alivePlayers.map(p => `<option value="${p.id}">${p.emoji || '🎭'} ${escapeHtml(p.name)}</option>`).join('');
+            document.getElementById('votingTarget').innerHTML = options;
             document.getElementById('votingSection').classList.remove('hidden');
-            updateNightTargets();
             addLog('🗳️ Началось голосование', 'day');
         }
         
         function eliminatePlayer() {
             const targetId = document.getElementById('votingTarget').value;
-            if (!targetId) {
-                showToast('Выберите игрока для исключения', 'error');
-                return;
-            }
+            if (!targetId) { showToast('Выберите игрока', 'error'); return; }
             
             const target = players.find(p => p.id === targetId);
             if (target && target.isAlive) {
                 target.isEliminated = true;
                 target.isAlive = false;
-                addLog(`🗑️ ${target.emoji || '🎭'} ${escapeHtml(target.name)} исключён из игры`, 'day');
+                addLog(`🗑️ ${target.emoji || '🎭'} ${escapeHtml(target.name)} исключён`, 'day');
                 showToast(`${target.name} исключён`, 'info');
-                
                 document.getElementById('votingSection').classList.add('hidden');
                 renderGamePlayersList();
                 saveGame();
-                
                 checkWinCondition();
+                endDay();
             }
         }
         
@@ -1127,41 +979,47 @@
             document.getElementById('nightPhase').classList.remove('hidden');
             document.getElementById('votingSection').classList.add('hidden');
             updatePhaseIndicator();
-            updateNightTargets();
-            
+            updateNightActionsUI();
             addLog(`🌙 Наступила ночь ${round}`, 'night');
             renderGamePlayersList();
             saveGame();
         }
         
-        function checkWinCondition() {
-            const aliveMafia = players.filter(p => p.role === 'mafia' && p.isAlive).length;
-            const aliveCivilians = players.filter(p => p.role !== 'mafia' && p.isAlive).length;
-            
-            if (aliveMafia === 0) {
-                setTimeout(() => {
-                    alert('🎉 Мирные жители победили! Мафия устранена!');
-                    handleResetGame();
-                }, 500);
-            } else if (aliveMafia >= aliveCivilians) {
-                setTimeout(() => {
-                    alert('🔪 Мафия победила! Количество мафии сравнялось с мирными!');
-                    handleResetGame();
-                }, 500);
+        function updatePhaseIndicator() {
+            const indicator = document.getElementById('phaseIndicator');
+            document.getElementById('roundNumber').textContent = round;
+            if (gamePhase === 'night') {
+                indicator.className = 'phase-indicator night';
+                indicator.innerHTML = `🌙 Ночь <span id="roundNumber">${round}</span>`;
+            } else {
+                indicator.className = 'phase-indicator day';
+                indicator.innerHTML = `☀️ День <span id="roundNumber">${round}</span>`;
             }
         }
         
-        // ===== SAVE/LOAD =====
+        function checkWinCondition() {
+            const aliveMafia = players.filter(p => (p.role === 'mafia' || p.role === 'don') && p.isAlive).length;
+            const aliveCivilians = players.filter(p => p.role !== 'mafia' && p.role !== 'don' && p.isAlive).length;
+            
+            if (aliveMafia === 0) {
+                setTimeout(() => { alert('🎉 Мирные жители победили! Мафия устранена!'); handleResetGame(); }, 500);
+            } else if (aliveMafia >= aliveCivilians && aliveCivilians > 0) {
+                setTimeout(() => { alert('🔪 Мафия победила!'); handleResetGame(); }, 500);
+            }
+        }
         
+        function addLog(message, type = 'day') {
+            const log = document.getElementById('eventLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        // ===== SAVE/LOAD/RESET =====
         function saveGame() {
-            const gameState = {
-                players,
-                gamePhase,
-                round,
-                gameInProgress,
-                timestamp: Date.now()
-            };
-            localStorage.setItem('mafiaGameState', JSON.stringify(gameState));
+            localStorage.setItem('mafiaGameState', JSON.stringify({ players, gameMode, gamePhase, round, gameInProgress, timestamp: Date.now() }));
         }
         
         function loadGame() {
@@ -1170,100 +1028,65 @@
                 if (saved) {
                     const state = JSON.parse(saved);
                     players = state.players || [];
+                    gameMode = state.gameMode || 'auto_role';
                     gamePhase = state.gamePhase || 'setup';
                     round = state.round || 1;
                     gameInProgress = state.gameInProgress || false;
                     
+                    selectMode(gameMode);
                     if (gameInProgress && players.length > 0) {
                         document.getElementById('setupPhase').classList.add('hidden');
                         document.getElementById('gamePhase').classList.remove('hidden');
-                        
                         if (gamePhase === 'night') {
                             document.getElementById('nightPhase').classList.remove('hidden');
                             document.getElementById('dayPhase').classList.add('hidden');
+                            updateNightActionsUI();
                         } else {
                             document.getElementById('nightPhase').classList.add('hidden');
                             document.getElementById('dayPhase').classList.remove('hidden');
                         }
-                        
                         renderGamePlayersList();
-                        updateNightTargets();
                         updatePhaseIndicator();
-                        updatePlayerCount();
                     } else {
                         renderPlayersList();
-                        updatePlayerCount();
                     }
-                    
+                    updateMaxPlayers();
                     showToast('✅ Игра загружена', 'success');
                 }
-            } catch (e) {
-                console.error('Load error:', e);
-                showToast('⚠️ Ошибка загрузки игры', 'error');
-            }
+            } catch (e) { console.error('Load error:', e); }
         }
         
-        // ===== RESET =====
-        
         function handleResetGame() {
-            if (!confirm('⚠️ Вы уверены? Все данные игры будут удалены.')) {
-                return;
-            }
-            
+            if (!confirm('⚠️ Вы уверены? Все данные будут удалены.')) return;
             players = [];
             gamePhase = 'setup';
             round = 1;
             gameInProgress = false;
-            
             localStorage.removeItem('mafiaGameState');
-            
             document.getElementById('setupPhase').classList.remove('hidden');
             document.getElementById('gamePhase').classList.add('hidden');
-            document.getElementById('nightPhase').classList.add('hidden');
-            document.getElementById('dayPhase').classList.add('hidden');
-            document.getElementById('eventLog').innerHTML = '';
-            document.getElementById('playersList').innerHTML = '<div class="empty-state">Нет игроков. Добавьте 4-20 игроков для начала игры.</div>';
-            
-            updatePlayerCount();
+            renderPlayersList();
+            updateMaxPlayers();
             showToast('🔄 Игра сброшена', 'info');
         }
         
-        // ===== EVENT HANDLERS =====
-        
         function handleAddPlayer() {
             const input = document.getElementById('playerNameInput');
-            const name = input.value;
-            const result = addPlayer(name);
-            if (result) {
-                input.value = '';
-                input.focus();
-            }
+            if (addPlayer(input.value)) input.value = '';
         }
         
-        // ===== INITIALIZATION =====
-        
-        document.addEventListener('DOMContentLoaded', function() {
+        // ===== INIT =====
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.addEventListener('click', () => selectMode(card.dataset.mode));
+            });
+            document.getElementById('playerNameInput').addEventListener('keypress', e => { if (e.key === 'Enter') handleAddPlayer(); });
             loadGame();
-            
-            const input = document.getElementById('playerNameInput');
-            if (input) {
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        handleAddPlayer();
-                    }
-                });
-            }
-            
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW registered:', reg))
-                    .catch(err => console.error('SW error:', err));
-            }
-            
-            showToast('✅ Приложение готово к работе', 'info');
+            selectMode('auto_role');
+            if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW error:', err));
+            showToast('✅ Приложение готово', 'info');
         });
         
-        // Expose functions globally
         window.addPlayer = addPlayer;
         window.removePlayer = removePlayer;
         window.handleAddPlayer = handleAddPlayer;
@@ -1277,8 +1100,8 @@
         window.eliminatePlayer = eliminatePlayer;
         window.skipDay = skipDay;
         window.saveGame = saveGame;
-        window.gameInProgress = gameInProgress;
-        window.players = players;
+        window.confirmRoleAssignment = confirmRoleAssignment;
+        window.closeRoleAssignment = closeRoleAssignment;
     </script>
 </body>
 </html>

@@ -375,7 +375,7 @@
                 <div class="card-title">💡 Правила</div>
                 <ul class="rules-list" id="rulesList">
                     <li>🌙 <strong>Ночь 0</strong> — знакомство с ролями</li>
-                    <li>☀️ <strong>1-й день</strong> — только обсуждение</li>
+                    <li>☀️ <strong>1-й день</strong> — только обсуждение (таймер 1 мин)</li>
                     <li>🌙 <strong>Ночь 1</strong> — начало активных действий</li>
                     <li>🗳️ <strong>Со 2-го дня</strong> — голосование</li>
                 </ul>
@@ -405,7 +405,6 @@
                     <button class="btn btn-secondary" onclick="startTimer()">▶️ Старт</button>
                     <button class="btn btn-secondary" onclick="pauseTimer()">⏸️ Пауза</button>
                     <button class="btn btn-secondary" onclick="resetTimer()">🔄 Сброс</button>
-                    <button class="btn btn-primary" onclick="addTimerLog()">📝 Отметить</button>
                 </div>
             </div>
             
@@ -467,7 +466,6 @@
         let gamePhase = 'setup';
         let round = 0;  // Ночь 0 - ознакомительная, Ночь 1 - первая с действиями
         let gameInProgress = false;
-        let pendingRoleAssignment = false;
         
         // Таймер
         let timerInterval = null;
@@ -491,13 +489,108 @@
             'civilian': '👤 Мирный'
         };
         
-        const mafiaNicknames = [
-            { name: 'Дон Котлето', emoji: '🍖' }, { name: 'Крёстный Пельмень', emoji: '🥟' },
-            { name: 'Семья Семечек', emoji: '🌻' }, { name: 'Мафиоззо', emoji: '🎩' },
-            { name: 'Босс Борода', emoji: '🧔' }, { name: 'Капо Картошка', emoji: '🥔' },
-            { name: 'Тихий Смерть', emoji: '🤫' }, { name: 'Нож В Спине', emoji: '🔪' },
-            { name: 'Ёжик В Тумане', emoji: '🦔' }, { name: 'Мистер Икс', emoji: '❌' }
-        ];
+       const mafiaNicknames = [
+    { name: 'Дон Котлето', emoji: '🍖' },
+    { name: 'Крёстный Пельмень', emoji: '🥟' },
+    { name: 'Семья Семечек', emoji: '🌻' },
+    { name: 'Мафиоззо', emoji: '🎩' },
+    { name: 'Босс Борода', emoji: '🧔' },
+    { name: 'Капо Картошка', emoji: '🥔' },
+    { name: 'Тихий Смерть', emoji: '🤫' },
+    { name: 'Нож В Спине', emoji: '🔪' },
+    { name: 'Ёжик В Тумане', emoji: '🦔' },
+    { name: 'Мистер Икс', emoji: '❌' },
+    { name: 'Консильери Кальмар', emoji: '🦑' },
+    { name: 'Омерта Оливье', emoji: '🥗' },
+    { name: 'Честный Вор', emoji: '🎭' },
+    { name: 'Налоговый Инспектор', emoji: '📊' },
+    { name: 'Бетонные Тапки', emoji: '👟' },
+    { name: 'Чёрная Метка', emoji: '⚫' },
+    { name: 'Тёмная Лошадка', emoji: '🐴' },
+    { name: 'Тень Отца', emoji: '👤' },
+    { name: 'Волк С Уолл-стрит', emoji: '🐺' },
+    { name: 'Кот Бегемот', emoji: '🐱' },
+    { name: 'Лис Патрикеевна', emoji: '🦊' },
+    { name: 'Шакал Таблетка', emoji: '🐕' },
+    { name: 'Ворон Предвестник', emoji: '🐦‍⬛' },
+    { name: 'Крыса Лабораторная', emoji: '🐀' },
+    { name: 'Змей Горыныч', emoji: '🐉' },
+    { name: 'Пирог С Начинкой', emoji: '🥧' },
+    { name: 'Борщ Секретный', emoji: '🍲' },
+    { name: 'Селедка Под Шубой', emoji: '🐟' },
+    { name: 'Оливье Сюрприз', emoji: '🥘' },
+    { name: 'Хинкали Сюрприз', emoji: '🥟' },
+    { name: 'Шаурма Теневая', emoji: '🌯' },
+    { name: 'Пельмень Судьбы', emoji: '🥟' },
+    { name: 'Блинчик Мести', emoji: '🥞' },
+    { name: 'Чемодан Без Ручки', emoji: '🧳' },
+    { name: 'Бетонная Роза', emoji: '🌹' },
+    { name: 'Золотой Пистолет', emoji: '🔫' },
+    { name: 'Тихий Пистолет', emoji: '🔇' },
+    { name: 'Громкая Тишина', emoji: '🔊' },
+    { name: 'Чёрный Мерседес', emoji: '🚗' },
+    { name: 'Кирпич Привет', emoji: '🧱' },
+    { name: 'Асфальт Цветы', emoji: '🛣️' },
+    { name: 'Терминатор Пенсионер', emoji: '🤖' },
+    { name: 'Рэмбо Дачник', emoji: '🏡' },
+    { name: 'Джон Уик Бухгалтер', emoji: '✏️' },
+    { name: 'Тони Старч Запойный', emoji: '🍺' },
+    { name: 'Волк Однорогий', emoji: '🦄' },
+    { name: 'Заяц Безумный', emoji: '🐰' },
+    { name: 'Медведь Веган', emoji: '🐻' },
+    { name: 'Никто Никто', emoji: '👻' },
+    { name: 'Имя Засекречено', emoji: '🔐' },
+    { name: 'Свидетель Программы', emoji: '👁️' },
+    { name: 'Анонимус Анонимус', emoji: '🎭' },
+    { name: 'Инкогнито Инкогнито', emoji: '🕵️' },
+    { name: 'Человек Никто', emoji: '👤' },
+    { name: 'Призрак Оперы', emoji: '👻' },
+    { name: 'Тот Самый', emoji: '🎯' },
+    { name: 'Который Знает', emoji: '🧠' },
+    { name: 'Не Спрашивай', emoji: '🤐' },
+    { name: 'Лучше Не Знать', emoji: '🙈' },
+    { name: 'Слепой Свидетель', emoji: '🙈' },
+    { name: 'Немой Шёпот', emoji: '🤫' },
+    { name: 'Глухой Звонок', emoji: '🔔' },
+    { name: 'Безликий', emoji: '🎭' },
+    { name: 'Человек Дождя', emoji: '🌧️' },
+    { name: 'Тень Сомнения', emoji: '🌑' },
+    { name: 'Шёпот Ветра', emoji: '💨' },
+    { name: 'Полуночник', emoji: '🌙' },
+    { name: 'Рассветный Гость', emoji: '🌅' },
+    { name: 'Туманный Странник', emoji: '🌫️' },
+    { name: 'Секретный Агент', emoji: '🕵️' },
+    { name: 'Двойной Агент', emoji: '🎭' },
+    { name: 'Крот', emoji: '🐭' },
+    { name: 'Легенда', emoji: '📖' },
+    { name: 'Миф', emoji: '✨' },
+    { name: 'Загадка', emoji: '❓' },
+    { name: 'Тайна', emoji: '🔮' },
+    { name: 'Секрет', emoji: '🤫' },
+    { name: 'Интриган', emoji: '🎭' },
+    { name: 'Манипулятор', emoji: '🎪' },
+    { name: 'Стратег', emoji: '♟️' },
+    { name: 'Тактик', emoji: '📐' },
+    { name: 'Шахматист', emoji: '♟️' },
+    { name: 'Игрок', emoji: '🎲' },
+    { name: 'Блефующий', emoji: '🃏' },
+    { name: 'Лжец', emoji: '🤥' },
+    { name: 'Актёр', emoji: '🎭' },
+    { name: 'Режиссёр', emoji: '🎬' },
+    { name: 'Сценарист', emoji: '📝' },
+    { name: 'Иллюзионист', emoji: '🎩' },
+    { name: 'Фокусник', emoji: '🪄' },
+    { name: 'Волшебник', emoji: '🧙' },
+    { name: 'Чародей', emoji: '🔮' },
+    { name: 'Маг', emoji: '✨' },
+    { name: 'Колдун', emoji: '🌙' },
+    { name: 'Шаман', emoji: '🥁' },
+    { name: 'Прорицатель', emoji: '🔮' },
+    { name: 'Оракул', emoji: '👁️' },
+    { name: 'Провидец', emoji: '🌟' },
+    { name: 'Ясновидящий', emoji: '🔮' },
+    { name: 'Предсказатель', emoji: '📜' }
+];
         
         // ===== TIMER FUNCTIONS =====
         function updateTimerDisplay() {
@@ -549,13 +642,6 @@
             timerRunning = false;
             updateTimerDisplay();
             addLog('🔄 Таймер сброшен на 1 минуту', 'day');
-        }
-        
-        function addTimerLog() {
-            const minutes = Math.floor(timerSeconds / 60);
-            const secs = timerSeconds % 60;
-            addLog(`📝 Отметка времени: ${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`, 'day');
-            showToast('Отметка добавлена в лог', 'info');
         }
         
         function showTimerCard(show) {
@@ -1021,8 +1107,11 @@
             document.getElementById('roundNumber').textContent = round;
             if (gamePhase === 'night') {
                 indicator.className = 'phase-indicator night';
-                indicator.innerHTML = `🌙 Ночь <span id="roundNumber">${round}</span>`;
-                if (round === 0) indicator.innerHTML = `🌙 Ночь <span id="roundNumber">0</span> (ознакомительная)`;
+                if (round === 0) {
+                    indicator.innerHTML = `🌙 Ночь <span id="roundNumber">0</span> (ознакомительная)`;
+                } else {
+                    indicator.innerHTML = `🌙 Ночь <span id="roundNumber">${round}</span>`;
+                }
             } else {
                 const dayNumber = round === 0 ? 1 : round + 1;
                 indicator.className = 'phase-indicator day';
@@ -1143,7 +1232,6 @@
         window.startTimer = startTimer;
         window.pauseTimer = pauseTimer;
         window.resetTimer = resetTimer;
-        window.addTimerLog = addTimerLog;
     </script>
 </body>
 </html>

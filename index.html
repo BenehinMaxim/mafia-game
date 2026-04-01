@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Мафия — Ведущий</title>
     
     <!-- PWA Meta Tags -->
@@ -43,18 +43,21 @@
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: #fff;
             min-height: 100vh;
-            padding: 16px;
+            min-height: -webkit-fill-available;
+            padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
             line-height: 1.5;
+            padding-top: max(20px, env(safe-area-inset-top));
         }
         
         .container {
             max-width: 600px;
             margin: 0 auto;
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
         }
         
         header {
             text-align: center;
-            padding: 20px 0;
+            padding: max(20px, env(safe-area-inset-top)) 0 20px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             margin-bottom: 20px;
         }
@@ -85,6 +88,7 @@
             padding: 16px;
             margin-bottom: 16px;
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
         
         .card-title {
@@ -131,13 +135,15 @@
             cursor: pointer;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
             transition: transform 0.1s, opacity 0.2s;
             -webkit-tap-highlight-color: transparent;
         }
         
         .btn:active {
-            transform: scale(0.98);
+            transform: scale(0.96);
+            opacity: 0.9;
         }
         
         .btn:disabled {
@@ -172,7 +178,6 @@
         
         .btn-block {
             width: 100%;
-            justify-content: center;
         }
         
         .btn-group {
@@ -186,13 +191,14 @@
             max-height: 300px;
             overflow-y: auto;
             margin-bottom: 12px;
+            -webkit-overflow-scrolling: touch;
         }
         
         .player-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 12px;
+            padding: 12px;
             background: rgba(255,255,255,0.05);
             border-radius: 8px;
             margin-bottom: 8px;
@@ -200,6 +206,7 @@
         
         .player-name {
             font-weight: 500;
+            word-break: break-word;
         }
         
         .player-role {
@@ -215,6 +222,8 @@
         .player-actions {
             display: flex;
             gap: 6px;
+            flex-shrink: 0;
+            margin-left: 8px;
         }
         
         .player-actions button {
@@ -227,7 +236,7 @@
             cursor: pointer;
         }
         
-        .player-actions button:hover {
+        .player-actions button:active {
             background: rgba(255,255,255,0.2);
         }
         
@@ -274,6 +283,8 @@
             background: rgba(255,255,255,0.1);
             color: #fff;
             font-size: 1rem;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .log-container {
@@ -284,6 +295,7 @@
             padding: 12px;
             font-size: 0.9rem;
             line-height: 1.6;
+            -webkit-overflow-scrolling: touch;
         }
         
         .log-entry {
@@ -311,6 +323,7 @@
             font-size: 0.9rem;
             line-height: 1.8;
             color: #ccc;
+            padding-left: 20px;
         }
         
         .rules-list li {
@@ -324,11 +337,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             z-index: 1000;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
         }
         
         .modal.active {
@@ -343,6 +356,7 @@
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         .modal-title {
@@ -368,7 +382,7 @@
         /* Toast Notifications */
         .toast {
             position: fixed;
-            bottom: 20px;
+            bottom: max(20px, env(safe-area-inset-bottom));
             left: 50%;
             transform: translateX(-50%);
             background: #4CAF50;
@@ -401,7 +415,7 @@
                 opacity: 0;
             }
             to {
-                bottom: 20px;
+                bottom: max(20px, env(safe-area-inset-bottom));
                 opacity: 1;
             }
         }
@@ -433,6 +447,14 @@
         .role-doctor { color: #4CAF50; }
         .role-commissioner { color: #2196F3; }
         .role-civilian { color: #9e9e9e; }
+        
+        /* iPhone notch support */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(16px, env(safe-area-inset-left));
+                padding-right: max(16px, env(safe-area-inset-right));
+            }
+        }
     </style>
 </head>
 <body>
@@ -444,7 +466,6 @@
                 <span>💾</span>
                 <span>Автосохранение</span>
                 <span>✅</span>
-                <small>Данные сохраняются</small>
             </div>
         </header>
         
@@ -512,7 +533,7 @@
                         </select>
                     </div>
                 </div>
-                <div style="margin-top: 16px; display: flex; gap: 10px;">
+                <div style="margin-top: 16px;">
                     <button class="btn btn-success btn-block" onclick="completeNight()">✅ Завершить ночь</button>
                 </div>
             </div>
@@ -573,44 +594,84 @@
         let round = 1;
         let gameInProgress = false;
         
-        // ===== MAFIA NICKNAMES =====
+        // ===== MAFIA NICKNAMES WITH EMOJIS =====
         const mafiaNicknames = [
-            // Классика мафии
-            'Дон Котлето', 'Крёстный Пельмень', 'Семья Семечек', 'Мафиоззо',
-            'Босс Борода', 'Капо Картошка', 'Консильери Колбаса', 'Омерта Оливье',
-            
-            // Саркастичные
-            'Честный Вор', 'Налоговый Инспектор', 'Благотворитель', 'Спонсор Мира',
-            'Законопослушный', 'Примерный Гражданин', 'Волонтёр Года', 'Филантроп',
-            
-            // Угрожающие с юмором
-            'Тихий Смерть', 'Нож В Спине', 'Бетонные Тапки', 'Цементный Бизнес',
-            'Чёрная Метка', 'Последний Звонок', 'Тёмная Лошадка', 'Тень Отца',
-            
-            // Ироничные профессии
-            'Сантехник Судеб', 'Электрик Душ', 'Парикмахер Пальцев', 'Стоматолог Костей',
-            'Бухгалтер Теней', 'Логист Исчезновений', 'Менеджер Проблем', 'HR Свидетелей',
-            
-            // Животные-мафиози
-            'Волк С Уолл-стрит', 'Кот Бегемот', 'Лис Патрикеевна', 'Шакал Таблетка',
-            'Голубь Миротворец', 'Ворон Предвестник', 'Крыса Лабораторная', 'Змей Горыныч',
-            
-            // Еда-мафия
-            'Пирог С Начинкой', 'Борщ Секретный', 'Селедка Под Шубой', 'Оливье Сюрприз',
-            'Хинкали Сюрприз', 'Шаурма Теневая', 'Пельмень Судьбы', 'Блинчик Мести',
-            
-            // Предметы
-            'Чемодан Без Ручки', 'Бетонная Роза', 'Золотой Пистолет', 'Тихий Пистолет',
-            'Громкая Тишина', 'Чёрный Мерседес', 'Кирпич Привет', 'Асфальт Цветы',
-            
-            // Персонажи
-            'Терминатор Пенсионер', 'Рэмбо Дачник', 'Джон Уик Бухгалтер', 'Тони Старч Запойный',
-            'Волк Однорогий', 'Заяц Безумный', 'Медведь Веган', 'Ёжик В Тумане',
-            
-            // Абсурдные
-            'Никто Никто', 'Имя Засекречено', 'Свидетель Программы', 'Анонимус Анонимус',
-            'Инкогнито Инкогнито', 'Мистер Икс', 'Человек Никто', 'Призрак Оперы',
-            'Тот Самый', 'Который Знает', 'Не Спрашивай', 'Лучше Не Знать'
+            { name: 'Дон Котлето', emoji: '🍖' },
+            { name: 'Крёстный Пельмень', emoji: '🥟' },
+            { name: 'Семья Семечек', emoji: '🌻' },
+            { name: 'Мафиоззо', emoji: '🎩' },
+            { name: 'Босс Борода', emoji: '🧔' },
+            { name: 'Капо Картошка', emoji: '🥔' },
+            { name: 'Консильери Колбаса', emoji: '🌭' },
+            { name: 'Омерта Оливье', emoji: '🥗' },
+            { name: 'Честный Вор', emoji: '🎭' },
+            { name: 'Налоговый Инспектор', emoji: '📊' },
+            { name: 'Благотворитель', emoji: '🎁' },
+            { name: 'Спонсор Мира', emoji: '🕊️' },
+            { name: 'Законопослушный', emoji: '⚖️' },
+            { name: 'Примерный Гражданин', emoji: '🏆' },
+            { name: 'Волонтёр Года', emoji: '🏅' },
+            { name: 'Филантроп', emoji: '💝' },
+            { name: 'Тихий Смерть', emoji: '🤫' },
+            { name: 'Нож В Спине', emoji: '🔪' },
+            { name: 'Бетонные Тапки', emoji: '👟' },
+            { name: 'Цементный Бизнес', emoji: '🏗️' },
+            { name: 'Чёрная Метка', emoji: '⚫' },
+            { name: 'Последний Звонок', emoji: '📞' },
+            { name: 'Тёмная Лошадка', emoji: '🐴' },
+            { name: 'Тень Отца', emoji: '👤' },
+            { name: 'Сантехник Судеб', emoji: '🔧' },
+            { name: 'Электрик Душ', emoji: '⚡' },
+            { name: 'Парикмахер Пальцев', emoji: '✂️' },
+            { name: 'Стоматолог Костей', emoji: '🦷' },
+            { name: 'Бухгалтер Теней', emoji: '📒' },
+            { name: 'Логист Исчезновений', emoji: '📦' },
+            { name: 'Менеджер Проблем', emoji: '💼' },
+            { name: 'HR Свидетелей', emoji: '📋' },
+            { name: 'Волк С Уолл-стрит', emoji: '🐺' },
+            { name: 'Кот Бегемот', emoji: '🐱' },
+            { name: 'Лис Патрикеевна', emoji: '🦊' },
+            { name: 'Шакал Таблетка', emoji: '🐕' },
+            { name: 'Голубь Миротворец', emoji: '🕊️' },
+            { name: 'Ворон Предвестник', emoji: '🦅' },
+            { name: 'Крыса Лабораторная', emoji: '🐀' },
+            { name: 'Змей Горыныч', emoji: '🐍' },
+            { name: 'Пирог С Начинкой', emoji: '🥧' },
+            { name: 'Борщ Секретный', emoji: '🍲' },
+            { name: 'Селедка Под Шубой', emoji: '🐟' },
+            { name: 'Оливье Сюрприз', emoji: '🥘' },
+            { name: 'Хинкали Сюрприз', emoji: '🥟' },
+            { name: 'Шаурма Теневая', emoji: '🌯' },
+            { name: 'Пельмень Судьбы', emoji: '🥟' },
+            { name: 'Блинчик Мести', emoji: '🥞' },
+            { name: 'Чемодан Без Ручки', emoji: '🧳' },
+            { name: 'Бетонная Роза', emoji: '🌹' },
+            { name: 'Золотой Пистолет', emoji: '🔫' },
+            { name: 'Тихий Пистолет', emoji: '🔇' },
+            { name: 'Громкая Тишина', emoji: '🔊' },
+            { name: 'Чёрный Мерседес', emoji: '🚗' },
+            { name: 'Кирпич Привет', emoji: '🧱' },
+            { name: 'Асфальт Цветы', emoji: '🛣️' },
+            { name: 'Терминатор Пенсионер', emoji: '🤖' },
+            { name: 'Рэмбо Дачник', emoji: '🏡' },
+            { name: 'Джон Уик Бухгалтер', emoji: '✏️' },
+            { name: 'Тони Старч Запойный', emoji: '🍺' },
+            { name: 'Волк Однорогий', emoji: '🦄' },
+            { name: 'Заяц Безумный', emoji: '🐰' },
+            { name: 'Медведь Веган', emoji: '🐻' },
+            { name: 'Ёжик В Тумане', emoji: '🦔' },
+            { name: 'Никто Никто', emoji: '👻' },
+            { name: 'Имя Засекречено', emoji: '🔐' },
+            { name: 'Свидетель Программы', emoji: '👁️' },
+            { name: 'Анонимус Анонимус', emoji: '🎭' },
+            { name: 'Инкогнито Инкогнито', emoji: '🕵️' },
+            { name: 'Мистер Икс', emoji: '❌' },
+            { name: 'Человек Никто', emoji: '👤' },
+            { name: 'Призрак Оперы', emoji: '👻' },
+            { name: 'Тот Самый', emoji: '🎯' },
+            { name: 'Который Знает', emoji: '🧠' },
+            { name: 'Не Спрашивай', emoji: '🤐' },
+            { name: 'Лучше Не Знать', emoji: '🙈' }
         ];
         
         // ===== UTILITIES =====
@@ -679,6 +740,7 @@
             const player = {
                 id: generateId(),
                 name: sanitizedName,
+                emoji: null,
                 role: null,
                 isAlive: true,
                 isEliminated: false
@@ -693,16 +755,28 @@
         
         function addRandomPlayer() {
             const usedNames = players.map(p => p.name.toLowerCase());
-            const availableNames = mafiaNicknames.filter(n => !usedNames.includes(n.toLowerCase()));
+            const availableNicknames = mafiaNicknames.filter(n => !usedNames.includes(n.name.toLowerCase()));
             
-            if (availableNames.length === 0) {
+            if (availableNicknames.length === 0) {
                 showToast('🎭 Все псевдонимы заняты! Придумайте своё имя', 'warning');
                 return;
             }
             
-            const randomName = availableNames[Math.floor(Math.random() * availableNames.length)];
-            addPlayer(randomName);
-            showToast(`🎭 Добавлен: ${randomName}`, 'success');
+            const randomNickname = availableNicknames[Math.floor(Math.random() * availableNicknames.length)];
+            const player = {
+                id: generateId(),
+                name: randomNickname.name,
+                emoji: randomNickname.emoji,
+                role: null,
+                isAlive: true,
+                isEliminated: false
+            };
+            
+            players.push(player);
+            renderPlayersList();
+            updatePlayerCount();
+            saveGame();
+            showToast(`🎭 Добавлен: ${randomNickname.emoji} ${randomNickname.name}`, 'success');
         }
         
         function shuffleNicknames() {
@@ -712,17 +786,18 @@
             }
             
             const usedNames = players.map(p => p.name.toLowerCase());
-            const availableNames = mafiaNicknames.filter(n => !usedNames.includes(n.toLowerCase()));
+            const availableNicknames = mafiaNicknames.filter(n => !usedNames.includes(n.name.toLowerCase()));
             
-            if (availableNames.length < players.length) {
+            if (availableNicknames.length < players.length) {
                 showToast('Недостаточно свободных псевдонимов', 'warning');
                 return;
             }
             
             players.forEach((player) => {
-                const randomIndex = Math.floor(Math.random() * availableNames.length);
-                player.name = availableNames[randomIndex];
-                availableNames.splice(randomIndex, 1);
+                const randomIndex = Math.floor(Math.random() * availableNicknames.length);
+                player.name = availableNicknames[randomIndex].name;
+                player.emoji = availableNicknames[randomIndex].emoji;
+                availableNicknames.splice(randomIndex, 1);
             });
             
             renderPlayersList();
@@ -750,10 +825,8 @@
                 return;
             }
             
-            const playerEmojis = ['🎩', '🕶️', '👔', '💼', '🎰', '💰', '🚬', '🗡️', '🎭', ''];
-            
-            list.innerHTML = players.map((player, index) => {
-                const emoji = playerEmojis[index % playerEmojis.length];
+            list.innerHTML = players.map((player) => {
+                const emoji = player.emoji || '🎭';
                 return `
                     <div class="player-item">
                         <span class="player-name">${emoji} ${escapeHtml(player.name)}</span>
@@ -773,10 +846,8 @@
                 return;
             }
             
-            const playerEmojis = ['🎩', '🕶️', '👔', '💼', '🎰', '💰', '🚬', '️', '🎭', '🃏'];
-            
-            list.innerHTML = players.map((player, index) => {
-                const emoji = playerEmojis[index % playerEmojis.length];
+            list.innerHTML = players.map((player) => {
+                const emoji = player.emoji || '🎭';
                 const roleClass = player.role ? `role-${player.role}` : '';
                 const roleText = player.role ? ` • ${getRoleName(player.role)}` : '';
                 const statusIcon = !player.isAlive ? '💀' : (player.isEliminated ? '🗑️' : '✅');
@@ -847,7 +918,10 @@
         function updateNightTargets() {
             const alivePlayers = players.filter(p => p.isAlive);
             const options = '<option value="">Выберите игрока...</option>' + 
-                alivePlayers.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+                alivePlayers.map(p => {
+                    const emoji = p.emoji || '🎭';
+                    return `<option value="${p.id}">${emoji} ${escapeHtml(p.name)}</option>`;
+                }).join('');
             
             document.getElementById('mafiaTarget').innerHTML = options;
             document.getElementById('doctorTarget').innerHTML = options;
@@ -928,12 +1002,13 @@
             if (mafiaTarget) {
                 const target = players.find(p => p.id === mafiaTarget);
                 if (target && target.isAlive) {
+                    const emoji = target.emoji || '🎭';
                     if (doctorTarget === mafiaTarget) {
-                        results.push(`💊 Доктор спас ${escapeHtml(target.name)} от мафии!`);
+                        results.push(`💊 Доктор спас ${emoji} ${escapeHtml(target.name)} от мафии!`);
                         addLog(`💊 Доктор спас ${target.name}`, 'action');
                     } else {
                         target.isAlive = false;
-                        results.push(`🔪 ${escapeHtml(target.name)} был убит мафией!`);
+                        results.push(`🔪 ${emoji} ${escapeHtml(target.name)} был убит мафией!`);
                         addLog(`🔪 Мафия убила ${target.name}`, 'night');
                     }
                 }
@@ -992,7 +1067,7 @@
             if (target && target.isAlive) {
                 target.isEliminated = true;
                 target.isAlive = false;
-                addLog(`🗑️ ${escapeHtml(target.name)} исключён из игры`, 'day');
+                addLog(`🗑️ ${target.emoji || '🎭'} ${escapeHtml(target.name)} исключён из игры`, 'day');
                 showToast(`${target.name} исключён`, 'info');
                 
                 document.getElementById('votingSection').classList.add('hidden');

@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" href="./icon-180.png">
     
     <!-- Security -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' ;">
     
     <!-- Prevent accidental close -->
     <script>
@@ -478,16 +478,16 @@
                     <button class="btn btn-primary" onclick="handleAddPlayer()">Добавить</button>
                 </div>
                 <div class="btn-group">
-                    <button class="btn btn-secondary" onclick="addRandomPlayer()">🎲 Случайный псевдоним</button>
-                    <button class="btn btn-warning" onclick="shuffleNicknames()">🔄 Перемешать псевдонимы</button>
+                    <button class="btn btn-secondary" onclick="addRandomPlayer()">🎲 Случайный ник</button>
+                    <button class="btn btn-warning" onclick="shuffleNicknames()">🔄 Перемешать ники</button>
                     <button class="btn btn-danger" onclick="handleResetGame()">🔧 Сброс всех</button>
                 </div>
             </div>
             
             <div class="card">
-                <div class="card-title">📋 Игроки (<span id="playerCount">0</span>)</div>
+                <div class="card-title">📋 Игроки (<span id="playerCount">0</span>/20)</div>
                 <div id="playersList" class="players-list">
-                    <div class="empty-state">Нет игроков. Добавьте хотя бы 4 для начала игры.</div>
+                    <div class="empty-state">Нет игроков. Добавьте 4-20 игроков для начала игры.</div>
                 </div>
                 <button class="btn btn-success btn-block" onclick="handleStartGame()">🎮 Новая игра</button>
             </div>
@@ -733,14 +733,14 @@
         
         // ===== PLAYER MANAGEMENT =====
         
-        function addPlayer(name) {
+        function addPlayer(name, emoji = null) {
             const sanitizedName = validatePlayerName(name, players);
             if (!sanitizedName) return false;
             
             const player = {
                 id: generateId(),
                 name: sanitizedName,
-                emoji: null,
+                emoji: emoji,
                 role: null,
                 isAlive: true,
                 isEliminated: false
@@ -754,11 +754,17 @@
         }
         
         function addRandomPlayer() {
+            // Проверка на максимальное количество игроков
+            if (players.length >= 20) {
+                showToast('⚠️ Максимум 20 игроков!', 'error');
+                return;
+            }
+            
             const usedNames = players.map(p => p.name.toLowerCase());
             const availableNicknames = mafiaNicknames.filter(n => !usedNames.includes(n.name.toLowerCase()));
             
             if (availableNicknames.length === 0) {
-                showToast('🎭 Все псевдонимы заняты! Придумайте своё имя', 'warning');
+                showToast('🎭 Все ники заняты!', 'warning');
                 return;
             }
             
@@ -789,7 +795,7 @@
             const availableNicknames = mafiaNicknames.filter(n => !usedNames.includes(n.name.toLowerCase()));
             
             if (availableNicknames.length < players.length) {
-                showToast('Недостаточно свободных псевдонимов', 'warning');
+                showToast('Недостаточно свободных ников', 'warning');
                 return;
             }
             
@@ -802,7 +808,7 @@
             
             renderPlayersList();
             saveGame();
-            showToast('🎭 Псевдонимы перемешаны!', 'success');
+            showToast('🎭 Ники перемешаны!', 'success');
         }
         
         function removePlayer(playerId) {
@@ -821,7 +827,7 @@
             const list = document.getElementById('playersList');
             
             if (players.length === 0) {
-                list.innerHTML = '<div class="empty-state">Нет игроков. Добавьте хотя бы 4 для начала игры.</div>';
+                list.innerHTML = '<div class="empty-state">Нет игроков. Добавьте 4-20 игроков для начала игры.</div>';
                 return;
             }
             
@@ -932,13 +938,15 @@
         // ===== PHASE MANAGEMENT =====
         
         function handleStartGame() {
+            // Проверка на минимальное количество игроков
             if (players.length < 4) {
-                showToast('Минимум 4 игрока для начала игры', 'error');
+                showToast('⚠️ Минимум 4 игрока!', 'error');
                 return;
             }
             
+            // Проверка на максимальное количество игроков
             if (players.length > 20) {
-                showToast('Максимум 20 игроков', 'error');
+                showToast('⚠️ Максимум 20 игроков!', 'error');
                 return;
             }
             
@@ -1185,7 +1193,7 @@
             document.getElementById('nightPhase').classList.add('hidden');
             document.getElementById('dayPhase').classList.add('hidden');
             document.getElementById('eventLog').innerHTML = '';
-            document.getElementById('playersList').innerHTML = '<div class="empty-state">Нет игроков. Добавьте хотя бы 4 для начала игры.</div>';
+            document.getElementById('playersList').innerHTML = '<div class="empty-state">Нет игроков. Добавьте 4-20 игроков для начала игры.</div>';
             
             updatePlayerCount();
             showToast('🔄 Игра сброшена', 'info');

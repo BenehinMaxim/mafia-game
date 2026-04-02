@@ -1033,14 +1033,13 @@ if (mafiaCount === 0) {
         }
         
         // ===== GAME INIT =====
-        function handleStartGame() {
-            const config = roleConfig[gameMode];
-            if (players.length < config.minPlayers) {
-                showToast(`⚠️ Минимум ${config.minPlayers} игрока!`, 'error');
-                return;
-                if (players.length < 4) {
-    showToast('❌ Минимум 4 игрока', 'error');
-    return;
+       function handleStartGame() {
+    const config = roleConfig[gameMode];
+    if (players.length < config.minPlayers) {
+        showToast(`⚠️ Минимум ${config.minPlayers} игрока!`, 'error');
+        return;
+    }
+    // Удалить дублирующую проверку (config.minPlayers уже содержит 4)
 }
             }
             if (players.length > config.maxPlayers) {

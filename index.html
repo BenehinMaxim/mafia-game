@@ -1038,15 +1038,11 @@ if (mafiaCount === 0) {
     if (players.length < config.minPlayers) {
         showToast(`⚠️ Минимум ${config.minPlayers} игрока!`, 'error');
         return;
-    }
-    // ❌ Удалить дублирующую проверку ниже!
-    // if (players.length < 4) { ... }
-    
+    }    
     if (players.length > config.maxPlayers) {
         showToast(`⚠️ Максимум ${config.maxPlayers} игроков!`, 'error');
         return;
     }
-    // ... остальной код
 }
             if (players.length > config.maxPlayers) {
                 showToast(`⚠️ Максимум ${config.maxPlayers} игроков!`, 'error');
@@ -1225,9 +1221,6 @@ if (round === 0) {
         showToast('❌ В 1-й день голосования нет', 'warning');
         return;
     }
-
-
-
     Object.values(votes).forEach(targetId => {
         voteCount[targetId] = (voteCount[targetId] || 0) + 1;
     });

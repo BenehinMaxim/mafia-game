@@ -1498,15 +1498,18 @@ function playBeep() {
         gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.2);
         oscillator.stop(audioContext.currentTime + 0.2);
         
-        audioContext.resume();
+        // ВАЖНО: нужно запустить контекст, если он приостановлен
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
     } catch(e) {
-        // Fallback для старых браузеров
-        const audio = new Audio();
-        audio.src = "data:audio/wav;base64,U3RlYWx0aCBzb3VuZA==";
-        audio.volume = 0.3;
-        audio.play().catch(() => {});
+        console.log('Audio error:', e);
+        // Альтернативный способ через HTMLAudioElement
+        try {
+            const audio = new Audio();
+            audio.src = "https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3";
+            audio.volume = 0.3;
+            audio.play().catch(() => {});
+        } catch(e2) {}
     }
 }
-    </script>
-</body>
-</html>

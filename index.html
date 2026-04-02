@@ -490,13 +490,39 @@
                 <div id="eventLog" class="log-container"></div>
             </div>
             
-            <div class="btn-group">
-                <button class="btn btn-secondary" onclick="saveGame()">💾 Сохранить</button>
-                <button class="btn btn-danger" onclick="handleResetGame()">🔧 Завершить</button>
-            </div>
+           <div class="btn-group">
+    <button class="btn btn-danger" onclick="showFinishGameModal()">🔧 Завершить игру</button>
+</div>
         </div>
         
         <!-- Night Results Modal -->
+        <div id="finishGameModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-title">🔧 Завершение игры</div>
+        <div class="card" style="margin-top: 8px;">
+            <div class="card-title">👥 Что делать с игроками?</div>
+            <div class="mode-selector-small" id="finishPlayersOption">
+                <div class="mode-chip" data-players="keep">🔄 Оставить всех игроков</div>
+                <div class="mode-chip" data-players="clear">🗑️ Удалить всех игроков</div>
+            </div>
+        </div>
+        
+        <div class="card" style="margin-top: 8px;">
+            <div class="card-title">🎮 Режим для следующей игры</div>
+            <div class="mode-selector-small" id="finishGameModeSelector">
+                <div class="mode-chip" data-mode="auto_role">🎭 Ролевая (авто)</div>
+                <div class="mode-chip" data-mode="card_role">🃏 Ролевая (карты)</div>
+                <div class="mode-chip" data-mode="auto_classic">⚡ Спортивная (авто)</div>
+                <div class="mode-chip" data-mode="card_classic">🃏⚡ Спортивная (карты)</div>
+            </div>
+        </div>
+        
+        <div class="modal-actions" style="margin-top: 16px;">
+            <button class="btn btn-success" onclick="confirmFinishGame()">✅ Подтвердить</button>
+            <button class="btn btn-secondary" onclick="closeFinishGameModal()">❌ Отмена</button>
+        </div>
+    </div>
+</div>
         <div id="nightResultsModal" class="modal">
             <div class="modal-content">
                 <div class="modal-title">🌙 Итоги ночи</div>
@@ -1467,23 +1493,102 @@ function finishVoting() {
                 }
             } catch (e) { console.error('Load error:', e); }
         }
+
+        // ===== FINISH GAME MODAL FUNCTIONS =====
+function showFinishGameModal() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerRunning = false;
+    timerInterval = null;
+    
+    // Выделяем текущий режим
+    document.querySelectorAll('#finishGameModeSelector .mode-chip').forEach(chip => {
+        chip.classList.remove('selected');
+        if (chip.dataset.mode === gameMode) chip.classList.add('selected');
+        chip.onclick = () => {
+            document.querySelectorAll('#finishGameModeSelector .mode-chip').forEach(c => c.classList.remove('selected'));
+            chip.classList.add('selected');
+        };
+    });
+    
+    // Выделяем опцию "Оставить игроков" по умолчанию
+    document.querySelectorAll('#finishPlayersOption .mode-chip').forEach(chip => {
+        chip.classList.remove('selected');
+        if (chip.dataset.players === 'keep') chip.classList.add('selected');
+        chip.onclick = () => {
+            document.querySelectorAll('#finishPlayersOption .mode-chip').forEach(c => c.classList.remove('selected'));
+            chip.classList.add('selected');
+        };
+    });
+    
+    document.getElementById('finishGameModal').classList.add('active');
+}
+
+function closeFinishGameModal() {
+    document.getElementById('finishGameModal').classList.remove('active');
+}
+
+function confirmFinishGame() {
+    const selectedPlayersOption = document.querySelector('#finishPlayersOption .mode-chip.selected');
+    const keepPlayers = selectedPlayersOption && selectedPlayersOption.dataset.players === 'keep';
+    
+    const selectedModeChip = document.querySelector('#finishGameModeSelector .mode-chip.selected');
+    const newMode = selectedModeChip ? selectedModeChip.dataset.mode : gameMode;
+    
+    // Применяем новый режим
+    gameMode = newMode;
+    selectMode(gameMode);
+    
+    if (!keepPlayers) {
+        // Удаляем всех игроков
+        players = [];
+        gamePhase = 'setup';
+        round = 0;
+        gameInProgress = false;
+        localStorage.removeItem('mafiaGameState');
         
-        function handleResetGame() {
-            if (!confirm('⚠️ Вы уверены? Все данные будут удалены.')) return;
-            if (timerInterval) clearInterval(timerInterval);
-            timerRunning = false;
-            timerInterval = null;
-            players = [];
-            gamePhase = 'setup';
-            round = 0;
-            gameInProgress = false;
-            localStorage.removeItem('mafiaGameState');
-            document.getElementById('setupPhase').classList.remove('hidden');
-            document.getElementById('gamePhase').classList.add('hidden');
-            renderPlayersList();
-            updateMaxPlayers();
-            showToast('🔄 Игра сброшена', 'info');
-        }
+        document.getElementById('setupPhase').classList.remove('hidden');
+        document.getElementById('gamePhase').classList.add('hidden');
+        renderPlayersList();
+        updateMaxPlayers();
+        showToast('🗑️ Игроки удалены. Можно добавлять новых!', 'info');
+    } else {
+        // Оставляем игроков, но сбрасываем их статусы
+        players.forEach(p => {
+            p.role = null;
+            p.isAlive = true;
+            p.isEliminated = false;
+        });
+        gamePhase = 'setup';
+        round = 0;
+        gameInProgress = false;
+        localStorage.removeItem('mafiaGameState');
+        
+        document.getElementById('setupPhase').classList.remove('hidden');
+        document.getElementById('gamePhase').classList.add('hidden');
+        renderPlayersList();
+        updateMaxPlayers();
+        showToast(`👥 Игроки сохранены (${players.length} чел.). Можно начать новую игру!`, 'success');
+    }
+    
+    closeFinishGameModal();
+}
+        
+       function handleResetGame() {
+    if (!confirm('⚠️ Вы уверены? Все данные будут удалены.')) return;
+    if (timerInterval) clearInterval(timerInterval);
+    timerRunning = false;
+    timerInterval = null;
+    players = [];
+    gamePhase = 'setup';
+    round = 0;
+    gameInProgress = false;
+    localStorage.removeItem('mafiaGameState');
+    document.getElementById('setupPhase').classList.remove('hidden');
+    document.getElementById('gamePhase').classList.add('hidden');
+    renderPlayersList();
+    updateMaxPlayers();
+    showToast('🔄 Игра сброшена', 'info');
+}
 
 
         
@@ -1557,6 +1662,9 @@ function finishVoting() {
         window.startNewGameWithNewPlayers = startNewGameWithNewPlayers;
         window.finishVoting = finishVoting;
         window.playBeep = playBeep;
+        window.showFinishGameModal = showFinishGameModal;
+        window.closeFinishGameModal = closeFinishGameModal;
+        window.confirmFinishGame = confirmFinishGame;
     </script>
 </body>
 </html>

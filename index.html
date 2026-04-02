@@ -1004,37 +1004,61 @@
             addLog(`🎭 Роли распределены: ${roleSummary}`, 'action');
         }
         
-        function showRoleAssignmentModal() {
-            const config = roleConfig[gameMode];
-            const possibleRoles = config.roles.filter(r => r !== 'civilian');
-            
-            const list = document.getElementById('roleAssignList');
-            list.innerHTML = players.map(player => `
-                <div class="role-assign-item">
-                    <span>${player.emoji || '🎭'} ${escapeHtml(player.name)}</span>
-                    <select class="role-select" data-player-id="${player.id}">
-                        <option value="civilian">👤 Мирный</option>
-                        ${possibleRoles.includes('mafia') ? '<option value="mafia">🔪 Мафия</option>' : ''}
-                        ${possibleRoles.includes('don') ? '<option value="don">👑 Дон</option>' : ''}
-                        ${possibleRoles.includes('doctor') ? '<option value="doctor">💊 Доктор</option>' : ''}
-                        ${possibleRoles.includes('commissioner') ? '<option value="commissioner">🔍 Комиссар</option>' : ''}
-                        ${possibleRoles.includes('sheriff') ? '<option value="sheriff">⭐ Шериф</option>' : ''}
-                    </select>
-                </div>
-            `).join('');
-            
-            document.getElementById('roleAssignmentModal').classList.add('active');
-        }
+       function showRoleAssignmentModal() {
+    const config = roleConfig[gameMode];
+    const possibleRoles = config.roles.filter(r => r !== 'civilian');
+    
+    const list = document.getElementById('roleAssignList');
+    
+    // 1️⃣ Генерируем HTML списка
+    list.innerHTML = players.map(player => `
+        <div class="role-assign-item">
+            <span>${player.emoji || '🎭'} ${escapeHtml(player.name)}</span>
+            <select class="role-select" data-player-id="${player.id}">
+                <option value="civilian">👤 Мирный</option>
+                ${possibleRoles.includes('mafia') ? '<option value="mafia">🔪 Мафия</option>' : ''}
+                ${possibleRoles.includes('don') ? '<option value="don">👑 Дон</option>' : ''}
+                ${possibleRoles.includes('doctor') ? '<option value="doctor">💊 Доктор</option>' : ''}
+                ${possibleRoles.includes('commissioner') ? '<option value="commissioner">🔍 Комиссар</option>' : ''}
+                ${possibleRoles.includes('sheriff') ? '<option value="sheriff">⭐ Шериф</option>' : ''}
+            </select>
+        </div>
+    `).join('');
+    
+    // 2️⃣ 🔥 ВСТАВЛЯЕМ СЮДА: восстанавливаем ранее выбранные роли (если есть)
+    setTimeout(() => {
+        document.querySelectorAll('.role-select').forEach(select => {
+            const player = players.find(p => p.id === select.dataset.playerId);
+            if (player?.role) {
+                select.value = player.role;
+            }
+        });
+    }, 0);
+    
+    // 3️⃣ Показываем модалку
+    document.getElementById('roleAssignmentModal').classList.add('active');
+}
         
        function confirmRoleAssignment() {
+    // 🔥 КРИТИЧЕСКИ ВАЖНО: сначала обновляем роли из DOM в объекты игроков
+    document.querySelectorAll('.role-select').forEach(select => {
+        const playerId = select.dataset.playerId;
+        const role = select.value;
+        const player = players.find(p => p.id === playerId);
+        if (player) {
+            player.role = role;
+        }
+    });
+    
+    // Теперь считаем роли уже с учётом выбранных значений
     const mafiaCount = players.filter(p => p.role === 'mafia').length;
     const donCount = players.filter(p => p.role === 'don').length;
     const sheriffCount = players.filter(p => p.role === 'sheriff').length;
     
-    // Для спортивного режима (classic)
+    // Валидация для спортивного режима (classic)
     if (gameMode.includes('classic')) {
-        if (donCount === 0) {
-            showToast('❌ В спортивном режиме должен быть 1 Дон!', 'error');
+        if (donCount !== 1) {
+            showToast('❌ В спортивном режиме должен быть ровно 1 Дон!', 'error');
             return;
         }
         if (mafiaCount < 1) {
@@ -1042,22 +1066,25 @@
             return;
         }
         if (sheriffCount !== 1) {
-            showToast('❌ В спортивном режиме должен быть 1 Шериф!', 'error');
+            showToast('❌ В спортивном режиме должен быть ровно 1 Шериф!', 'error');
             return;
         }
     } else {
-        // Для ролевого режима
-        if (mafiaCount === 0) {
+        // Валидация для ролевого режима
+        if (mafiaCount < 1) {
             showToast('❌ Должна быть хотя бы 1 мафия', 'error');
             return;
         }
     }
     
+    // Всё ок — закрываем модалку и запускаем игру
     document.getElementById('roleAssignmentModal').classList.remove('active');
+    
     const roleCounts = {};
     players.forEach(p => { roleCounts[p.role] = (roleCounts[p.role] || 0) + 1; });
     const roleSummary = Object.entries(roleCounts).map(([r, c]) => `${roleNames[r]}: ${c}`).join(', ');
     addLog(`🎭 Роли назначены ведущим: ${roleSummary}`, 'action');
+    
     startGameAfterRoles();
 }
         

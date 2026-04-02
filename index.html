@@ -1459,32 +1459,7 @@ function finishVoting() {
             if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW error:', err));
             showToast('✅ Приложение готово', 'info');
         });
-        
-        window.addPlayer = addPlayer;
-        window.removePlayer = removePlayer;
-        window.handleAddPlayer = handleAddPlayer;
-        window.addRandomPlayer = addRandomPlayer;
-        window.shuffleNicknames = shuffleNicknames;
-        window.handleStartGame = handleStartGame;
-        window.handleResetGame = handleResetGame;
-        window.completeNight = completeNight;
-        window.closeNightResults = closeNightResults;
-        window.startVoting = startVoting;
-        window.skipDay = skipDay;
-        window.saveGame = saveGame;
-        window.confirmRoleAssignment = confirmRoleAssignment;
-        window.closeRoleAssignment = closeRoleAssignment;
-        window.startTimer = startTimer;
-        window.pauseTimer = pauseTimer;
-        window.resetTimer = resetTimer;
-        window.showVictoryModal = showVictoryModal;
-        window.closeVictoryModal = closeVictoryModal;
-        window.startNewGameWithSamePlayers = startNewGameWithSamePlayers;
-        window.startNewGameWithNewPlayers = startNewGameWithNewPlayers;
-        window.finishVoting = finishVoting;
-        // ===== ЗВУК ТАЙМЕРА =====
-
-function playBeep() {
+        function playBeep() {
     try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
@@ -1514,3 +1489,30 @@ function playBeep() {
             audio.play().catch(() => {});
         } catch(e2) {}
     }
+
+            
+        
+        window.addPlayer = addPlayer;
+        window.removePlayer = removePlayer;
+        window.handleAddPlayer = handleAddPlayer;
+        window.addRandomPlayer = addRandomPlayer;
+        window.shuffleNicknames = shuffleNicknames;
+        window.handleStartGame = handleStartGame;
+        window.handleResetGame = handleResetGame;
+        window.completeNight = completeNight;
+        window.closeNightResults = closeNightResults;
+        window.startVoting = startVoting;
+        window.skipDay = skipDay;
+        window.saveGame = saveGame;
+        window.confirmRoleAssignment = confirmRoleAssignment;
+        window.closeRoleAssignment = closeRoleAssignment;
+        window.startTimer = startTimer;
+        window.pauseTimer = pauseTimer;
+        window.resetTimer = resetTimer;
+        window.showVictoryModal = showVictoryModal;
+        window.closeVictoryModal = closeVictoryModal;
+        window.startNewGameWithSamePlayers = startNewGameWithSamePlayers;
+        window.startNewGameWithNewPlayers = startNewGameWithNewPlayers;
+        window.finishVoting = finishVoting;
+        // ===== ЗВУК ТАЙМЕРА =====
+

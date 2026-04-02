@@ -58,4 +58,10 @@ self.addEventListener('activate', event => {
       self.clients.claim()
     ])
   );
+  // Обработка сообщения от страницы для принудительного обновления
+self.addEventListener('message', event => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
+});
 });

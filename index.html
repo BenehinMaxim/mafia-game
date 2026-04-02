@@ -1032,8 +1032,8 @@ if (mafiaCount === 0) {
             document.getElementById('roleAssignmentModal').classList.remove('active');
         }
         
-        // ===== GAME INIT =====
-  function handleStartGame() {
+ // ===== GAME INIT =====
+function handleStartGame() {
     const config = roleConfig[gameMode];
     if (players.length < config.minPlayers) {
         showToast(`⚠️ Минимум ${config.minPlayers} игрока!`, 'error');
@@ -1043,23 +1043,18 @@ if (mafiaCount === 0) {
         showToast(`⚠️ Максимум ${config.maxPlayers} игроков!`, 'error');
         return;
     }
+    
+    players.forEach(p => { p.role = null; p.isAlive = true; p.isEliminated = false; });
+    round = 0;
+    gameInProgress = true;
+    
+    if (gameMode === 'auto_role' || gameMode === 'auto_classic') {
+        autoAssignRoles();
+        startGameAfterRoles();
+    } else {
+        showRoleAssignmentModal();
+    }
 }
-            if (players.length > config.maxPlayers) {
-                showToast(`⚠️ Максимум ${config.maxPlayers} игроков!`, 'error');
-                return;
-            }
-            
-            players.forEach(p => { p.role = null; p.isAlive = true; p.isEliminated = false; });
-            round = 0;
-            gameInProgress = true;
-            
-            if (gameMode === 'auto_role' || gameMode === 'auto_classic') {
-                autoAssignRoles();
-                startGameAfterRoles();
-            } else {
-                showRoleAssignmentModal();
-            }
-        }
         
         function startGameAfterRoles() {
             gamePhase = 'night';
@@ -1216,74 +1211,27 @@ if (round === 0) {
             saveGame();
         }
 
-        function startVoting() {
+function startVoting() {
     if (round === 0) {
         showToast('❌ В 1-й день голосования нет', 'warning');
         return;
     }
-    Object.values(votes).forEach(targetId => {
-        voteCount[targetId] = (voteCount[targetId] || 0) + 1;
-    });
-
-    if (Object.keys(voteCount).length === 0) {
-        showToast('❌ Нет голосов', 'warning');
-        return;
-    }
-
-    // ищем максимум
-    let maxVotes = 0;
-    let eliminated = [];
-
-    for (const [playerId, count] of Object.entries(voteCount)) {
-        if (count > maxVotes) {
-            maxVotes = count;
-            eliminated = [playerId];
-        } else if (count === maxVotes) {
-            eliminated.push(playerId);
-        }
-    }
-
-    // ничья
-    if (eliminated.length > 1) {
-        addLog('⚖️ Ничья при голосовании — никто не исключён', 'day');
-        showToast('Ничья — никто не выбыл', 'info');
-        endDay();
-        return;
-    }
-
-    const target = players.find(p => p.id === eliminated[0]);
-
-    if (target) {
-        target.isAlive = false;
-        target.isEliminated = true;
-
-        addLog(`🗑️ ${target.name} исключён (${maxVotes} голосов)`, 'day');
-        showToast(`${target.name} исключён`, 'info');
-    }
-
-    document.getElementById('votingSection').classList.add('hidden');
-
-    renderGamePlayersList();
-    saveGame();
-    checkWinCondition();
-    endDay();
-}
-            
+    
     showTimerCard(false);
     pauseTimer();
-
+    
     votingInProgress = true;
     votes = {};
-
+    
     const alivePlayers = players.filter(p => p.isAlive);
     const container = document.getElementById('votingSection');
-
+    
     container.innerHTML = `
         <div style="margin-bottom:10px;">🗳️ Введите голоса:</div>
         ${alivePlayers.map(p => `
             <div style="margin-bottom:8px;">
-                <strong>${escapeHtml(p.name)}</strong> →
-                <select onchange="setVote('${p.id}', this.value)">
+                <strong>${escapeHtml(p.name)}</strong> → 
+                <select data-voter="${p.id}" class="vote-select">
                     <option value="">--</option>
                     ${alivePlayers.map(t => `
                         <option value="${t.id}">${escapeHtml(t.name)}</option>
@@ -1291,36 +1239,41 @@ if (round === 0) {
                 </select>
             </div>
         `).join('')}
-        <button class="btn btn-danger btn-block" onclick="finishVoting()">Завершить голосование</button>
+        <button class="btn btn-danger btn-block" onclick="finishVoting()">✅ Завершить голосование</button>
     `;
-
+    
+    // Добавляем обработчики для select
+    document.querySelectorAll('.vote-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const voterId = this.dataset.voter;
+            const targetId = this.value;
+            if (!targetId) {
+                delete votes[voterId];
+            } else {
+                votes[voterId] = targetId;
+            }
+        });
+    });
+    
     container.classList.remove('hidden');
     addLog('🗳️ Голосование началось', 'day');
 }
         
-            function setVote(voterId, targetId) {
-    if (!targetId) {
-        delete votes[voterId];
-    } else {
-        votes[voterId] = targetId;
-    }
-}
-
 function finishVoting() {
     const voteCount = {};
-
+    
     Object.values(votes).forEach(targetId => {
         voteCount[targetId] = (voteCount[targetId] || 0) + 1;
     });
-
+    
     if (Object.keys(voteCount).length === 0) {
         showToast('❌ Нет голосов', 'warning');
         return;
     }
-
+    
     let maxVotes = 0;
     let eliminated = [];
-
+    
     for (const [playerId, count] of Object.entries(voteCount)) {
         if (count > maxVotes) {
             maxVotes = count;
@@ -1329,32 +1282,30 @@ function finishVoting() {
             eliminated.push(playerId);
         }
     }
-
+    
     if (eliminated.length > 1) {
         addLog('⚖️ Ничья при голосовании — никто не исключён', 'day');
         showToast('Ничья — никто не выбыл', 'info');
+        document.getElementById('votingSection').classList.add('hidden');
         endDay();
         return;
     }
-
+    
     const target = players.find(p => p.id === eliminated[0]);
-
+    
     if (target) {
         target.isAlive = false;
         target.isEliminated = true;
-
         addLog(`🗑️ ${target.name} исключён (${maxVotes} голосов)`, 'day');
         showToast(`${target.name} исключён`, 'info');
     }
-
+    
     document.getElementById('votingSection').classList.add('hidden');
-
     renderGamePlayersList();
     saveGame();
     checkWinCondition();
     endDay();
-}
-        
+} 
     
         
         function skipDay() {

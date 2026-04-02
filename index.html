@@ -1440,6 +1440,21 @@ function finishVoting() {
             updateMaxPlayers();
             showToast('🔄 Игра сброшена', 'info');
         }
+
+        // Инициализация звука по первому нажатию любой кнопки
+function initAudio() {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    ctx.resume().then(() => {
+        console.log('Audio ready');
+        ctx.close();
+    }).catch(e => console.log('Audio init error:', e));
+}
+
+// Добавляем слушатель на первый клик по документу
+document.body.addEventListener('click', function initAudioOnce() {
+    initAudio();
+    document.body.removeEventListener('click', initAudioOnce);
+}, { once: true });
         
         function handleAddPlayer() {
             const input = document.getElementById('playerNameInput');

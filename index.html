@@ -791,28 +791,6 @@
     updateTimerDisplay();
     addLog('⏱️ Таймер обсуждения запущен (1 минута)', 'day');
 }
-        
-        function startTimer() {
-            if (timerInterval) clearInterval(timerInterval);
-            timerRunning = true;
-            timerInterval = setInterval(() => {
-                if (timerRunning && timerSeconds > 0) {
-                    timerSeconds--;
-                    updateTimerDisplay();
-                    if (timerSeconds === 0) {
-                        clearInterval(timerInterval);
-                        timerInterval = null;
-                        timerRunning = false;
-                        showToast('⏰ Время обсуждения вышло!', 'warning');
-                        addLog('⏰ Таймер обсуждения завершён', 'day');
-                        updateTimerDisplay();
-                    }
-                }
-            }, 1000);
-            updateTimerDisplay();
-            addLog('⏱️ Таймер обсуждения запущен (1 минута)', 'day');
-        }
-        
       
         
        function resetTimer() {

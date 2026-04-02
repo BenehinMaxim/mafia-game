@@ -791,6 +791,24 @@
     updateTimerDisplay();
     addLog('⏱️ Таймер обсуждения запущен (1 минута)', 'day');
 }
+        function pauseTimer() {
+    timerRunning = false;
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    updateTimerDisplay();
+    addLog('⏸️ Таймер обсуждения на паузе', 'day');
+}
+
+function resetTimer() {
+    pauseTimer();
+    timerSeconds = 60;
+    timerRunning = false;
+    lastBeepSecond = null;
+    updateTimerDisplay();
+    addLog('🔄 Таймер сброшен на 1 минуту', 'day');
+}
       
         
        function resetTimer() {

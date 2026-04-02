@@ -1026,23 +1026,40 @@
             document.getElementById('roleAssignmentModal').classList.add('active');
         }
         
-        function confirmRoleAssignment() {
-           const mafiaCount = players.filter(p => p.role === 'mafia' || p.role === 'don').length;
-
-if (mafiaCount === 0) {
-    showToast('❌ Должна быть хотя бы 1 мафия', 'error');
-    return;
-}
-            
-            document.getElementById('roleAssignmentModal').classList.remove('active');
-            
-            const roleCounts = {};
-            players.forEach(p => { roleCounts[p.role] = (roleCounts[p.role] || 0) + 1; });
-            const roleSummary = Object.entries(roleCounts).map(([r, c]) => `${roleNames[r]}: ${c}`).join(', ');
-            addLog(`🎭 Роли назначены ведущим: ${roleSummary}`, 'action');
-            
-            startGameAfterRoles();
+       function confirmRoleAssignment() {
+    const mafiaCount = players.filter(p => p.role === 'mafia').length;
+    const donCount = players.filter(p => p.role === 'don').length;
+    const sheriffCount = players.filter(p => p.role === 'sheriff').length;
+    
+    // Для спортивного режима (classic)
+    if (gameMode.includes('classic')) {
+        if (donCount === 0) {
+            showToast('❌ В спортивном режиме должен быть 1 Дон!', 'error');
+            return;
         }
+        if (mafiaCount < 1) {
+            showToast('❌ В спортивном режиме должна быть хотя бы 1 Мафия!', 'error');
+            return;
+        }
+        if (sheriffCount !== 1) {
+            showToast('❌ В спортивном режиме должен быть 1 Шериф!', 'error');
+            return;
+        }
+    } else {
+        // Для ролевого режима
+        if (mafiaCount === 0) {
+            showToast('❌ Должна быть хотя бы 1 мафия', 'error');
+            return;
+        }
+    }
+    
+    document.getElementById('roleAssignmentModal').classList.remove('active');
+    const roleCounts = {};
+    players.forEach(p => { roleCounts[p.role] = (roleCounts[p.role] || 0) + 1; });
+    const roleSummary = Object.entries(roleCounts).map(([r, c]) => `${roleNames[r]}: ${c}`).join(', ');
+    addLog(`🎭 Роли назначены ведущим: ${roleSummary}`, 'action');
+    startGameAfterRoles();
+}
         
         function closeRoleAssignment() {
             document.getElementById('roleAssignmentModal').classList.remove('active');

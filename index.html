@@ -1033,15 +1033,21 @@ if (mafiaCount === 0) {
         }
         
         // ===== GAME INIT =====
-       function handleStartGame() {
+  function handleStartGame() {
     const config = roleConfig[gameMode];
     if (players.length < config.minPlayers) {
         showToast(`⚠️ Минимум ${config.minPlayers} игрока!`, 'error');
         return;
     }
-    // Удалить дублирующую проверку (config.minPlayers уже содержит 4)
+    // ❌ Удалить дублирующую проверку ниже!
+    // if (players.length < 4) { ... }
+    
+    if (players.length > config.maxPlayers) {
+        showToast(`⚠️ Максимум ${config.maxPlayers} игроков!`, 'error');
+        return;
+    }
+    // ... остальной код
 }
-            }
             if (players.length > config.maxPlayers) {
                 showToast(`⚠️ Максимум ${config.maxPlayers} игроков!`, 'error');
                 return;
@@ -1502,7 +1508,6 @@ function finishVoting() {
         window.completeNight = completeNight;
         window.closeNightResults = closeNightResults;
         window.startVoting = startVoting;
-        window.eliminatePlayer = eliminatePlayer;
         window.skipDay = skipDay;
         window.saveGame = saveGame;
         window.confirmRoleAssignment = confirmRoleAssignment;

@@ -334,6 +334,34 @@
         .mode-chip.selected { background: #4CAF50; color: white; }
         .player-option { display: flex; gap: 12px; justify-content: center; margin: 16px 0; }
         .player-option .btn { flex: 1; }
+        /* Update notification */
+.update-toast {
+    position: fixed;
+    bottom: max(80px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff9800;
+    color: #1a1a2e;
+    padding: 14px 24px;
+    border-radius: 30px;
+    z-index: 10001;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    font-weight: 500;
+    cursor: pointer;
+}
+.update-toast button {
+    background: #1a1a2e;
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+.update-toast button:active { transform: scale(0.96); }
     </style>
 </head>
 <body>
@@ -535,6 +563,10 @@
     </div>
     
     <div id="toastContainer"></div>
+    <div id="updateNotification" class="update-toast" style="display: none;">
+    🔄 Доступна новая версия!
+    <button onclick="refreshApp()">Обновить</button>
+</div>
     
     <script>
         // ===== STATE =====
@@ -1606,8 +1638,83 @@ function confirmFinishGame() {
             loadGame();
             selectMode('auto_role');
             if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW error:', err));
+           startUpdateChecking();
             showToast('✅ Приложение готово', 'info');
         });
+
+// ===== UPDATE CHECKER (1 раз в неделю, офлайн-безопасно) =====
+let newVersionAvailable = false;
+
+function checkForUpdates() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistration().then(registration => {
+            if (registration && registration.waiting) {
+                showUpdateNotification();
+            }
+            if (navigator.onLine && registration) {
+                registration.update().catch(() => {});
+            }
+        });
+        
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            window.location.reload();
+        });
+    }
+}
+
+function showUpdateNotification() {
+    const notification = document.getElementById('updateNotification');
+    if (notification && notification.style.display !== 'flex') {
+        notification.style.display = 'flex';
+        if (navigator.onLine) {
+            showToast('🔄 Доступно обновление! Нажмите "Обновить"', 'warning');
+        }
+    }
+}
+
+function refreshApp() {
+    if (confirm('🔄 Обновить приложение?\n\nТекущая игра будет сохранена и восстановлена после обновления.')) {
+        saveGame();
+        showToast('💾 Сохраняем игру...', 'info');
+        
+        setTimeout(() => {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(reg => {
+                    if (reg && reg.waiting) {
+                        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    } else {
+                        window.location.reload();
+                    }
+                });
+            } else {
+                window.location.reload();
+            }
+        }, 300);
+    }
+}
+
+function startUpdateChecking() {
+    const LAST_CHECK_KEY = 'mafia_last_update_check';
+    const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+    
+    const lastCheck = localStorage.getItem(LAST_CHECK_KEY);
+    const now = Date.now();
+    
+    if (!lastCheck || (now - parseInt(lastCheck)) >= ONE_WEEK_MS) {
+        localStorage.setItem(LAST_CHECK_KEY, now.toString());
+        if (navigator.onLine) {
+            checkForUpdates();
+        }
+    }
+    
+    window.addEventListener('online', () => {
+        const lastCheckSaved = localStorage.getItem(LAST_CHECK_KEY);
+        if (!lastCheckSaved || (Date.now() - parseInt(lastCheckSaved)) >= ONE_WEEK_MS) {
+            localStorage.setItem(LAST_CHECK_KEY, Date.now().toString());
+            checkForUpdates();
+        }
+    });
+}
         
         function playBeep() {
             try {
@@ -1662,6 +1769,7 @@ function confirmFinishGame() {
         window.startNewGameWithNewPlayers = startNewGameWithNewPlayers;
         window.finishVoting = finishVoting;
         window.playBeep = playBeep;
+        window.refreshApp = refreshApp;
         window.showFinishGameModal = showFinishGameModal;
         window.closeFinishGameModal = closeFinishGameModal;
         window.confirmFinishGame = confirmFinishGame;

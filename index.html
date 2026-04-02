@@ -758,6 +758,20 @@
         }
         
         // ===== TIMER FUNCTIONS =====
+        function updateTimerDisplay() {
+    const minutes = Math.floor(timerSeconds / 60);
+    const secs = timerSeconds % 60;
+    const display = document.getElementById('timerDisplay');
+    if (display) {
+        display.textContent = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        
+        display.classList.remove('timer-running', 'timer-warning', 'timer-danger');
+        if (timerSeconds <= 10) display.classList.add('timer-danger');
+        else if (timerSeconds <= 30) display.classList.add('timer-warning');
+        else if (timerRunning) display.classList.add('timer-running');
+    }
+}
+        
       function startTimer() {
     if (timerInterval) clearInterval(timerInterval);
     timerRunning = true;
@@ -801,15 +815,6 @@
     addLog('⏸️ Таймер обсуждения на паузе', 'day');
 }
 
-function resetTimer() {
-    pauseTimer();
-    timerSeconds = 60;
-    timerRunning = false;
-    lastBeepSecond = null;
-    updateTimerDisplay();
-    addLog('🔄 Таймер сброшен на 1 минуту', 'day');
-}
-      
         
        function resetTimer() {
     pauseTimer();
